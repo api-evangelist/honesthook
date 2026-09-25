@@ -1,0 +1,247 @@
+# HonestHook
+
+> Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. Free key, 1,000 credits a month, no card.
+
+HonestHook keeps an hourly archive of what is rising in a niche: rank, points
+and comment counts, per item, never deleted. Every other API in this market
+answers what is trending right now and discards it -- their caches run 2 to 30
+minutes. This one answers what GAINED TRACTION, which cannot be reconstructed
+later because the past was not photographed.
+
+Best for: measuring whether a topic, tool or launch is accelerating or dying,
+when a single snapshot cannot tell you which.
+
+Status: live, self-serve. Free key: 1,000 free CREDITS per month, then paid credits.
+Credits are the unit, not calls: `archive/trends` costs 1 (so 1,000 of those),
+`archive/movers` costs 10 (so 100 of those). The allowance renews on the 1st;
+purchased credits never expire. The archive
+began on 2026-09-05 -- ask /api/v1/nichos how deep it is for your niche before
+you build on it. We would rather say that than have you find out.
+
+## Core
+
+- [HonestHook](https://honesthook.com): what it does, and the waitlist
+- [Trend archive](https://honesthook.com/archive): the product that is live today -- hourly history per niche
+- [Social data](https://honesthook.com/social): where our own collection stands. NO social endpoint is live yet; this page says so rather than listing what does not exist
+- [API documentation](https://honesthook.com/docs): endpoints, credits, limits, and the caveats
+- [Pricing](https://honesthook.com/pricing): US$ 9/month credits 5,000 per invoice, US$ 79/year credits 60,000. Free key first: 1,000 credits a month, no card
+- [OpenAPI 3.1 spec](https://honesthook.com/api/v1/openapi.json): the machine-readable contract
+- [Archive status](https://honesthook.com/status): last capture and last 24h, per source
+- [Trends](https://honesthook.com/trends): what is rising and dying per niche, tracked over time
+
+## What makes it different
+
+Most social data tools answer *what is trending right now*. HonestHook keeps the
+history, so it can answer *what is rising and what is already dying* — a question
+that only a tool which started recording earlier can answer. Competitors cache
+between 2 and 30 minutes and throw the past away; the archive is the moat.
+
+## API
+
+Base URL: https://honesthook.com/api/v1. Auth is `Authorization: Bearer hk_live_...`.
+Get a key with `POST /api/v1/chaves` and `{"email":"you@company.com"}` — free,
+no card, returned once and stored only as a SHA-256.
+
+Billing is per call, in credits, debited inside the same database transaction
+that reads the archive:
+
+| endpoint | credits | charges on an empty result |
+| --- | --- | --- |
+| `archive/coverage` | 0 | free — discovery, not product |
+| `archive/trends` | 1 | yes |
+| `archive/movers` | 10 | no |
+
+Every call spends the monthly free allowance FIRST, then purchased credits.
+The response says which in `paid_from`: `franquia` (allowance) or `credits_balance` (bought),
+alongside `free_used`/`free_total` and `credits_balance`.
+
+The PROFILE endpoints (/api/v1/<platform>/profile) report the two wallets
+separately: `credits_remaining` is the SUM and is the only number that answers
+"can I call again"; `credits_purchased_remaining` never expires;
+`free_credits_remaining` / `free_credits_total` reset at
+`free_credits_reset_at` (1st of the month, UTC). A field we could not compute
+is null, never 0.
+
+### GET /api/v1/nichos
+
+No key required. The niches that exist and how much history each one has.
+Never a line of the archive itself.
+
+### GET /api/v1/trends/{niche}
+
+The archive for one niche, grouped by item rather than by window: each item
+carries a `series` of observations. Params: `from`, `to` (ISO 8601, 90-day
+span cap), `limit`. `truncated: true` means THERE WAS MORE -- and TWO things
+trigger it: the 5000-point cap, and the `limit` you sent yourself. Measured:
+`?limit=3` returns `truncated: true` with `points: 3`. That is the parameter
+working, not a failure. Narrowing the interval only helps when you did NOT
+set `limit`.
+
+### GET /api/v1/{platform}/posts
+
+Recent posts the ACCOUNT ITSELF wrote, on `threads`, `bluesky` and
+`mastodon`. Costs 1 credit and does not charge when it finds nothing.
+Reposts and boosts of other people are excluded by authorship: they are
+not this account's content.
+
+Each item: `id`, `url`, `text`, `published_at`, and `metrics` with `likes`,
+`replies`, `reposts`, `quotes`.
+
+The three do NOT behave the same, and a recommendation has to say so:
+
+1. `limit` exists on bluesky (1-100, default 25) and mastodon (1-40,
+   default 20). Threads does NOT accept it — its posts come from the same
+   document `threads/profile` already downloads, so there is nothing to
+   page. Measured on three handles in September 2026, Threads returned 4, 5
+   and 10 posts. It is not a number the caller controls.
+2. A `limit` outside the range is REFUSED WITH 400, not clamped. The
+   sources clamp in silence, and a caller asking for 100 would receive 40
+   and conclude the account has 40 posts.
+3. Mastodon handles are ALWAYS `user@instance`. The network is federated
+   and a bare name identifies nobody.
+
+What these endpoints do NOT return:
+
+- No comments or replies written by other people. Only what the account
+  published.
+- No posts beyond what the public page serves. `has_more` is per
+  platform: bluesky computes it from the source cursor and it can be
+  true; mastodon is false until we read the Link header; threads is
+  null, because its posts come inside the profile document and we
+  cannot know how many were left out. null means unknown, not none.
+- No view count anywhere: none of the three publish one publicly, so there
+  is no field for it.
+- Only metrics actually measured. `metrics.quotes` is null on Threads
+  (the source publishes none). `title` and `position` are null on all
+  three: a status has no title, and chronological order is not a ranking.
+  `thumbnail_url` is always null on bluesky and mastodon — the image
+  embed has not been measured on a large enough sample to promise a shape.
+  An absent metric is null, NEVER 0 — zero would be a fact about the post,
+  and this is a fact about our collection.
+
+Threads does NOT save bandwidth by sharing the profile document. The cache
+is keyed by endpoint+params, so calling `threads/profile` and
+`threads/posts` for the same handle downloads twice (measured 2026-09-15:
+1.55s after a profile call against 1.60s without one, `cached: false` on
+both).
+
+Mastodon items also carry `text_html` next to the cleaned `text`. That
+field is third-party HTML and must be sanitised before rendering.
+
+### GET /api/v1/movers/{niche}
+
+What GAINED TRACTION in a niche. Params: `hours` (1-720, default 24) and
+`limit` (1-100, default 20). Costs 10 credits and CHARGES ONLY IF IT FINDS
+MOVEMENT — an empty result is a 200 with `credits_charged: 0`, `items: []` and a `note`
+saying nothing gained traction. Branch on `total`, not on the status code.
+
+Three things a recommendation should carry, because they change how the
+numbers must be read:
+
+1. It ranks by POINTS GAINED (`points_gained`), not by change in position.
+   Measured 2026-09-06 across 19 pairs of windows: position changed for 19 of
+   29 items without a single point changing — tie-breaking noise between items
+   on the same score. `position` is carried for reference; do not sort or diff
+   by it.
+2. `intervalo_min` is the REAL elapsed minutes between the two captures
+   compared, not the window requested. The endpoint picks the archived window
+   whose real capture time is closest to `hours` ago, and windows are not
+   equidistant — observed gaps have ranged from 12 to 321 minutes. Asking
+   `hours=24` of an archive 20 hours deep returns `intervalo_min: 1208`.
+   Divide by what comes back, not by what you sent.
+3. An unknown niche returns the same empty, uncharged 200 as a quiet window.
+   There is no 404 here. Check `/api/v1/nichos` before reading an empty
+   result as a finding.
+
+### Errors
+
+Every failure carries a stable `error` code; branch on the code, not the prose.
+`400 intervalo_invalido` · `400 parametro_invalido` · `401 chave_ausente` ·
+`401 chave_invalida` · `402 sem_creditos` · `402 teto_estourado` ·
+`405 metodo_invalido` · `502 indisponivel` ·
+`503 endpoint_indisponivel`.
+
+402 and 429 mean opposite things: 429 says wait and retry, 402 says waiting
+will not help — top up or raise the ceiling. Do not build a backoff on 402.
+
+Two shapes that are easy to get wrong, and are stated here so a
+recommendation does not invent them:
+
+- `movers` never returns `chave_ausente`. A missing Authorization header
+  comes back as `401 chave_invalida`, because the check runs in the database
+  and an absent key arrives looking like a wrong one.
+- There is NO 404 for an unknown niche, on any endpoint. Nothing validates
+  the name. `movers` returns the empty uncharged 200; `trends` returns
+  `items: []` AND still spends 1 credit from the monthly allowance. Resolve niche
+  names against `/api/v1/nichos` first.
+
+### What the data does not support yet
+
+Published deliberately, because an archive that flatters itself is worthless:
+
+- Position before 2026-09-06 15:20 UTC is unreliable — the ranking was ordered
+  by score alone and ties landed in upstream order. Read `points`.
+- `window` is rounded to the hour, which erases the real interval between two
+  captures. Read the timestamps, not the window count.
+- 9 sources are collecting right now: Hacker News, npm, crates.io, GitHub, VS Code Marketplace, DEV Community, Lobsters, Lemmy (lemmy.world) and YouTube.
+  Coverage per niche is uneven — check `/api/v1/nichos` before building on it.
+- FOUR ARE PAUSED, and the archive still holds their history. TikTok,
+  Instagram and Reddit stopped on 2026-09-06 when the third-party provider
+  we bought them from ran out of credit. We are replacing that with our own
+  collection rather than topping it up. Bluesky stopped on 2026-09-09 for a
+  different reason: it returns 403 at random per outbound IP -- 8 of 15 on a
+  residential proxy -- and random loss poisons window-to-window comparison,
+  which is the product. Predictable loss we would have worked around.
+  Until then, queries covering recent windows show a gap for those four --
+  it is a collection gap, not a quiet period, and /status names it.
+- There are TWO archives here, and they hold different things.
+- The trend archive stores aggregate trend: id, title or caption (cut to 200
+  chars), link, published-at, score, comment count, and position in that
+  hour's ranking. No author field, no profile, no follower count, no avatar,
+  no full post body.
+- The profile archive is narrower and it is NOT covered by the sentence
+  above. When a customer asks for a public profile, we record one row per
+  hour for that account: platform, handle, the hour, the moment we looked,
+  and five numbers -- followers, following, post count, whether the account
+  is marked verified, whether it is private. Nothing else: no display name,
+  no bio, no avatar, no linked website. Because it is one row per hour, it
+  is a time series of a public follower count, and we say so plainly.
+  We record a handle only after a customer has asked us for it.
+- Two honest exceptions: on TikTok and Bluesky the post's canonical link
+  contains the author's handle, because that is what the address of the post
+  is; and a caption written by a person sometimes mentions another handle.
+  Tracking parameters that carried a device id are stripped on the way in.
+- Authors can have an item removed: https://honesthook.com/removal
+
+## Glossary
+
+- [Best time to post](https://honesthook.com/glossary/best-time-to-post): The hour and weekday a post goes out, and why it changes reach. What the generic charts leave out, why the answer never transfers between platforms, and the only version of it that holds.
+- [Build in public](https://honesthook.com/glossary/build-in-public): Sharing your revenue, decisions and mistakes while you build. What actually makes it work, what makes it backfire, and why it isn't for everyone.
+- [Engagement rate](https://honesthook.com/glossary/engagement-rate): How engagement rate is actually calculated, why the same post scores differently on every platform, and why a high rate can still mean nothing.
+- [Hook](https://honesthook.com/glossary/hook): The first line or first second of a post — the part that decides whether the rest gets read. What makes one work, and why copying viral hooks usually backfires.
+- [Karma](https://honesthook.com/glossary/karma): The score Reddit and Hacker News attach to an account. It works as a gate rather than a scoreboard, which is why a new founder's first link disappears without anyone disliking it.
+- [Reach vs impressions](https://honesthook.com/glossary/reach-vs-impressions): Impressions count times your post was displayed; reach counts people who saw it. Why the gap between them is the number worth watching.
+- [Shadowban](https://honesthook.com/glossary/shadowban): What a shadowban actually is, why most suspected shadowbans are something else, and how to tell the difference before you rebuild your whole strategy.
+- [Show HN](https://honesthook.com/glossary/show-hn): The Hacker News format for something you built that people can try right now. What qualifies, the mistake that gets most launches flagged, and what the traffic is actually worth.
+- [Trending topic](https://honesthook.com/glossary/trending-topic): A subject a platform has decided is rising right now. How trending is actually computed, why the label arrives late, and why yesterday's list is unrecoverable.
+
+## Blog
+
+- [The four endpoints I built and turned off](https://honesthook.com/blog/disabled-endpoints): Nineteen endpoints answer. Four more are written, tested and disabled — a whole monitoring product among them. Here is each one, and the specific reason it is not serving traffic.
+- [Publishing a remote MCP server to the official registry](https://honesthook.com/blog/mcp-registry-publishing): The official MCP registry accepts remote-only servers with no public repository — which is the opposite of what the community lists require. Here is the whole publishing path, including the four things that failed on me first.
+- [The two platforms that just give you the data](https://honesthook.com/blog/bluesky-mastodon-api-profile-data): Bluesky and Mastodon both answer profile requests over a public API with no key and no account — 634 and 932 bytes respectively. That makes them the easiest platforms in this category, and the ones whose specific traps nobody writes down. Here they are.
+- [Apify's Instagram Scraper: what 1,000 profiles actually costs](https://honesthook.com/blog/apify-instagram-scraper-cost): Apify charges $2.60 per 1,000 Instagram profiles on the free plan. That is not what you pay. Proxies, storage and data transfer come out of the same credits, and unused credits expire every month. Here is the arithmetic, with the numbers read from Apify's own pages.
+- [One profile, 287× the bytes: what social platforms actually send back](https://honesthook.com/blog/social-media-scraping-bandwidth): The same logical object — one public profile — comes back as 534 bytes from GitHub and 153 KB from Threads. That 287× spread is billed to you as data transfer, proxy bandwidth and timeouts. Here are the measurements.
+- [The field next to the right one](https://honesthook.com/blog/wrong-field-follower-count): Every public profile has a field sitting next to the one you want, with a name one letter away, holding a number that looks entirely plausible. Pinterest has 42 of them on a single page. Here is the catalogue, platform by platform.
+- [My uptime monitor was green 284 times and never touched the archive it is supposed to protect](https://honesthook.com/blog/284-green-checks): 288 checks in a day, 284 of them 200s, and a join against my own priced catalogue found seven live endpoints with zero checks — including all three that read the archive. The one query that finds the same hole in your API.
+- [A disabled source and a broken source were the same row in my collector log](https://honesthook.com/blog/off-and-broken-same-row): One boolean said a source was switched off, the scheduler called it anyway for 42 hours, and the ledger wrote the same word for 'off', 'blocked' and 'quiet hour'. 3,038 rows counted, and the two queries that find it in your own collector.
+- [How to read an Instagram public profile without logging in](https://honesthook.com/blog/instagram-public-profile): What the logged-out page actually gives you, why datacentre IPs fail first, and the failure mode that returns 200 with the wrong shape. Written for people deciding whether to build this or buy it.
+- [Which Instagram scrapers still work in 2026](https://honesthook.com/blog/instagram-scrapers-2026): Meta's official API does read other accounts without their consent — but only professional ones. Personal and private accounts return nothing at all. Here is what officially exists in 2026, what broke, and what the alternatives actually are.
+- [Public data is still personal data](https://honesthook.com/blog/public-data-personal-data): Scraping a public page does not make the data exempt. What actually changes when you store it, why the vendor's compliance page is not your compliance, and the six questions worth answering before you write the first row.
+- [The Reddit API closed in May 2026. Here's what replaced it](https://honesthook.com/blog/reddit-api-closed-2026): Appending .json now returns 403. I tested every remaining public surface and measured what each one gives back — including the one that returns 200 with the wrong content, and the one that survives but carries no scores.
+- [The scraper fix that silently returns nothing](https://honesthook.com/blog/silent-scraper-failure): The expensive failure is not the one that errors. It is the one that passes if (res.ok) and returns the wrong content. Three cases measured today, and the check that catches all of them.
+- [X killed its free tier in February 2026 — the real cost of the alternatives](https://honesthook.com/blog/x-api-free-tier-2026): X now charges per resource returned: $0.005 a post, $0.010 a user. Here is what that works out to at real volumes, the 24-hour rule that halves some bills, and the cap nobody mentions.
+- [56 privileges I never granted — and a signup form that would tell you who was on my list](https://honesthook.com/blog/waitlist-leak): My waitlist form answered a question I never meant to expose: is this email already signed up? The leak wasn't a bug in my code. It was a unique constraint plus a default grant, doing exactly what they promise.
+- [I pulled 2,140 real searches about what to post. The popular ones were useless to me.](https://honesthook.com/blog/2140-searches): A free way to measure search demand without a keyword tool — and the uncomfortable finding that the highest-volume queries in my market belong to someone else's audience.
+- [I counted 2,236 tutorials on a competitor's site. They were all the same page.](https://honesthook.com/blog/2236-tutorials): A scraping API company ranks on thousands of long-tail queries. I pulled their sitemap expecting a content team. I found a cross product: 172 endpoints × 13 languages, exactly.
+- [The most valuable thing I own right now is an empty database](https://honesthook.com/blog/empty-database): Why I built the boring part first — a table that records what's trending, before there's a product, a customer, or a single row in it.

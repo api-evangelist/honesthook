@@ -1,0 +1,19 @@
+generated: '2026-09-25'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://honesthook.com/pricing
+sources:
+- https://honesthook.com/pricing
+name: HonestHook pricing
+audience: developer-api
+pricing_basis: per-seat
+plans:
+- name: Monthly
+  price_text: US$ 9 per month
+  price: 9
+  description: 5,000 credits
+- name: Yearly
+  price_text: US$ 79 per year
+  price: 79
+  description: 60,000 credits
+docs: https://honesthook.com/pricing

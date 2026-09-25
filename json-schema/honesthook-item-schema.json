@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/honesthook/main/json-schema/honesthook-item-schema.json",
+  "title": "Item",
+  "x-generated": "2026-09-25",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/_original/honesthook-api-openapi.json#/components/schemas/Item",
+  "type": "object",
+  "properties": {
+    "external_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "entered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "left_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "null while the item is still in the ranking."
+    },
+    "best_position": {
+      "type": "integer"
+    },
+    "movement": {
+      "type": "integer",
+      "description": "Oldest position minus newest. Positive means it climbed. Read this together with `points` in the series: a change of position with no change in points is a tie reshuffle, not a trend."
+    },
+    "series": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SeriesPoint"
+      }
+    }
+  },
+  "$defs": {
+    "SeriesPoint": {
+      "type": "object",
+      "description": "One observation of one item, in one hourly window.",
+      "properties": {
+        "window": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Rounded to the hour. This is the bucket, not the exact capture time — two runs in the same hour share a window."
+        },
+        "position": {
+          "type": "integer",
+          "description": "1 = top of the ranking."
+        },
+        "points": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "comments": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

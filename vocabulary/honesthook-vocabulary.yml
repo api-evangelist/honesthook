@@ -1,0 +1,57 @@
+generated: '2026-09-25'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/_original/honesthook-api-openapi.json
+vocabulary:
+  name: HonestHook Domain Vocabulary
+  description: 'Terms declared by HonestHook''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-09-25'
+  terms:
+  - term: ApiError
+    definition: 'Object declared by the contract with fields: error, message, http, limit, renews_at, credits_balance, needed, spent_this_month,
+      cap.'
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/ApiError
+  - term: SeriesPoint
+    definition: One observation of one item, in one hourly window.
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/SeriesPoint
+  - term: Item
+    definition: 'Object declared by the contract with fields: external_id, title, url, platform, entered_at, left_at, best_position, movement,
+      series.'
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/Item
+  - term: Mover
+    definition: One item that GAINED points between the two compared windows. Items that lost points, and items present in only one of the two
+      windows, are not in this list — losing is not traction, and an item with nothing to compare against has no delta.
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/Mover
+  - term: Author
+    definition: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact
+      about the account, null is a fact about our reading.'
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/Author
+  - term: PostItem
+    definition: 'Object declared by the contract with fields: id, url, text, text_html, title, position, published_at, thumbnail_url, metrics.'
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/PostItem
+  - term: PostsEnvelope
+    definition: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people
+      are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon
+      reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and canno'
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/PostsEnvelope
+  - term: ProfileEnvelope
+    definition: Identical shape on success and on error, so a client writes one parser. `success` is the only field that decides; `data` and `error`
+      are mutually exclusive and the other is null, never absent.
+    tags:
+    - Object
+    source: openapi/_original/honesthook-api-openapi.json#/components/schemas/ProfileEnvelope

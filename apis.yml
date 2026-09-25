@@ -1,23 +1,91 @@
 aid: honesthook
 name: HonestHook
-description: 'HonestHook is a company surfaced via the API Evangelist harvest backlog (source: new-submission)
-  and added to the network as a stub for full-pipeline profiling.'
+image: https://honesthook.com/opengraph-image?a788b65e55e89a3a
+description: HonestHook provides a unified API to access public social media data from major platforms. It offers profiles and posts through a
+  single key and response format, handling rate limits, retries, and platform changes. Users get 1,000 free credits per month without a credit
+  card, with paid tiers for higher usage.
 url: https://raw.githubusercontent.com/api-evangelist/honesthook/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:new-submission
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-25 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-09-25'
 modified: '2026-09-25'
 tags:
 - Company
-apis: []
+- API
+- Social Media
+- Data Aggregation
+- SaaS
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Spectral
+  url: rules/honesthook-rules.yml
+- type: JSONLD
+  url: json-ld/honesthook-context.jsonld
+- type: Vocabulary
+  url: vocabulary/honesthook-vocabulary.yml
+- type: Conformance
+  url: conformance/honesthook-conformance.yml
+- type: Plans
+  url: plans/honesthook-plans-pricing.yml
+- type: DataModel
+  url: data-model/honesthook-data-model.yml
+- type: ErrorCatalog
+  url: errors/honesthook-problem-types.yml
+- type: LLMsTxt
+  url: llms/honesthook-llms.txt
+- type: Hosts
+  url: hosts/honesthook-hosts.yml
+- type: Vendors
+  url: vendors/honesthook-vendors.yml
+- type: TermsOfService
+  url: https://honesthook.com/terms
+- type: PrivacyPolicy
+  url: https://honesthook.com/privacy
+- type: GettingStarted
+  url: https://honesthook.com/quickstart
+- type: DomainSecurity
+  url: security/honesthook-domain-security.yml
 - type: Website
   url: https://honesthook.com/
+- type: Documentation
+  url: https://honesthook.com/docs
+- type: Pricing
+  url: https://honesthook.com/pricing
+- type: StatusPage
+  url: https://honesthook.com/status
+- type: SignUp
+  url: https://honesthook.com/login
+- type: Blog
+  url: https://honesthook.com/blog
+apis:
+- aid: honesthook:honesthook-api-api
+  name: HonestHook API API
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform
+    changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists.
+    Plus a historical trend a
+  humanURL: https://honesthook.com/docs
+  baseURL: https://honesthook.com
+  properties:
+  - type: OpenAPI
+    url: openapi/_original/honesthook-api-openapi.json
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+x-enrichment:
+  date: '2026-09-25'
+  status: enriched
+  artifacts_added: 20
+  pass: modular-v1
+  engine: identity=local,contract=local,surfaces=local,docs=local

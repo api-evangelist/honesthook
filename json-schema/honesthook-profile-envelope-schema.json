@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/honesthook/main/json-schema/honesthook-profile-envelope-schema.json",
+  "title": "ProfileEnvelope",
+  "description": "Identical shape on success and on error, so a client writes one parser. `success` is the only field that decides; `data` and `error` are mutually exclusive and the other is null, never absent.",
+  "x-generated": "2026-09-25",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/_original/honesthook-api-openapi.json#/components/schemas/ProfileEnvelope",
+  "type": "object",
+  "required": [
+    "success",
+    "platform",
+    "endpoint",
+    "data",
+    "error",
+    "credits_used",
+    "credits_remaining",
+    "cached",
+    "request_id"
+  ],
+  "properties": {
+    "success": {
+      "type": "boolean"
+    },
+    "platform": {
+      "type": "string"
+    },
+    "endpoint": {
+      "type": "string"
+    },
+    "data": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/Author"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "has_more": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "error": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "parametro_invalido",
+            "chave_invalida",
+            "sem_creditos",
+            "teto_estourado",
+            "nao_encontrado",
+            "bloqueado",
+            "indisponivel"
+          ],
+          "description": "Branch on this, never on the message text."
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "credits_used": {
+      "type": "integer"
+    },
+    "credits_remaining": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "THE SUM: purchased balance plus what is left of this month's free allowance. This is the only number that answers \"can I call again\" — it is not 0 while you can still call. null means we could not read it, which is not the same as zero."
+    },
+    "credits_purchased_remaining": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Bought credits. These never expire."
+    },
+    "free_credits_remaining": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "What is left of this month's free allowance."
+    },
+    "free_credits_total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The monthly free allowance for this key."
+    },
+    "free_credits_reset_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the free allowance resets: 00:00 UTC on the 1st. It is here so the sum dropping at the turn of the month is expected rather than a surprise."
+    },
+    "cached": {
+      "type": "boolean",
+      "description": "`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`."
+    },
+    "request_id": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "Author": {
+      "type": "object",
+      "description": "The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.",
+      "properties": {
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Stable identifier on that platform."
+        },
+        "handle": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bio": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "avatar_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "followers": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "following": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "posts_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "verified": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "is_private": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "external_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

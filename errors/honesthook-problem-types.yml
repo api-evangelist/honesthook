@@ -1,0 +1,78 @@
+generated: '2026-09-25'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/_original/honesthook-api-openapi.json
+format: custom
+envelope:
+  media_type: application/json
+  schema: ProfileEnvelope
+coverage:
+  operations: 18
+  statuses_declared: 9
+problems:
+- status: 400
+  title: Bad Request
+  description: '`parametro_invalido` — the handle is missing or does not match this platform''s format. Nothing
+    is charged.'
+  operations: 17
+  media_types:
+  - application/json
+  schema: ProfileEnvelope
+- status: 401
+  title: Unauthorized
+  description: '`chave_invalida` — key missing, unknown or inactive.'
+  operations: 17
+  media_types:
+  - application/json
+  schema: ProfileEnvelope
+- status: 402
+  title: Payment Required
+  description: 'Out of credits. Two different types, and they mean different things: `sem_creditos` (both wallets
+    are empty) and `teto_estourado` (the key h'
+  operations: 13
+  media_types:
+  - application/json
+  schema: ProfileEnvelope
+- status: 404
+  title: Not Found
+  description: '`nao_encontrado` — no such profile on that platform.'
+  operations: 15
+  media_types:
+  - application/json
+  schema: ProfileEnvelope
+- status: 405
+  title: Method Not Allowed
+  description: See the shared error shape.
+  operations: 2
+  media_types: []
+  schema: null
+- status: 429
+  title: Too Many Requests
+  description: Monthly quota exhausted. The body carries `limit` and `renews_at`.
+  operations: 1
+  media_types:
+  - application/json
+  schema: ApiError
+- status: 451
+  title: Unavailable For Legal Reasons
+  description: '`bloqueado` — the platform refused us. The resource exists and YOUR key is fine; 403 would wrongly
+    blame the caller.'
+  operations: 12
+  media_types:
+  - application/json
+  schema: ProfileEnvelope
+- status: 502
+  title: Bad Gateway
+  description: See the shared error shape.
+  operations: 2
+  media_types: []
+  schema: null
+- status: 503
+  title: Service Unavailable
+  description: '`indisponivel` — this endpoint is switched off in the catalogue, or a dependency of ours is down.
+    Your key is fine.'
+  operations: 13
+  media_types:
+  - application/json
+  schema: ProfileEnvelope

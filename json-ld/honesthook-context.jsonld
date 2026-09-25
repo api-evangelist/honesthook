@@ -1,0 +1,222 @@
+{
+  "@context": {
+    "@vocab": "https://honesthook.com/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "honesthook": "https://honesthook.com/schema#",
+    "ApiError": "honesthook:ApiError",
+    "error": {
+      "@id": "honesthook:error",
+      "@type": "xsd:string"
+    },
+    "message": {
+      "@id": "honesthook:message",
+      "@type": "xsd:string"
+    },
+    "http": {
+      "@id": "honesthook:http",
+      "@type": "xsd:integer"
+    },
+    "limit": {
+      "@id": "honesthook:limit",
+      "@type": "xsd:integer"
+    },
+    "renews_at": {
+      "@id": "honesthook:renews_at",
+      "@type": "xsd:date"
+    },
+    "credits_balance": {
+      "@id": "honesthook:credits_balance",
+      "@type": "xsd:integer"
+    },
+    "needed": {
+      "@id": "honesthook:needed",
+      "@type": "xsd:integer"
+    },
+    "spent_this_month": {
+      "@id": "honesthook:spent_this_month",
+      "@type": "xsd:integer"
+    },
+    "cap": {
+      "@id": "honesthook:cap",
+      "@type": "xsd:integer"
+    },
+    "SeriesPoint": "honesthook:SeriesPoint",
+    "window": {
+      "@id": "honesthook:window",
+      "@type": "xsd:dateTime"
+    },
+    "position": {
+      "@id": "honesthook:position",
+      "@type": "xsd:integer"
+    },
+    "points": {
+      "@id": "honesthook:points",
+      "@type": "xsd:integer"
+    },
+    "comments": {
+      "@id": "honesthook:comments",
+      "@type": "xsd:integer"
+    },
+    "Item": "honesthook:Item",
+    "external_id": {
+      "@id": "honesthook:external_id",
+      "@type": "xsd:string"
+    },
+    "title": {
+      "@id": "honesthook:title",
+      "@type": "xsd:string"
+    },
+    "url": {
+      "@id": "honesthook:url",
+      "@type": "@id"
+    },
+    "platform": {
+      "@id": "honesthook:platform",
+      "@type": "xsd:string"
+    },
+    "entered_at": {
+      "@id": "honesthook:entered_at",
+      "@type": "xsd:dateTime"
+    },
+    "left_at": {
+      "@id": "honesthook:left_at",
+      "@type": "xsd:dateTime"
+    },
+    "best_position": {
+      "@id": "honesthook:best_position",
+      "@type": "xsd:integer"
+    },
+    "movement": {
+      "@id": "honesthook:movement",
+      "@type": "xsd:integer"
+    },
+    "series": {
+      "@id": "honesthook:series",
+      "@container": "@list"
+    },
+    "Mover": "honesthook:Mover",
+    "points_gained": {
+      "@id": "honesthook:points_gained",
+      "@type": "xsd:integer"
+    },
+    "Author": "honesthook:Author",
+    "id": {
+      "@id": "honesthook:id",
+      "@type": "xsd:string"
+    },
+    "handle": {
+      "@id": "honesthook:handle",
+      "@type": "xsd:string"
+    },
+    "name": {
+      "@id": "honesthook:name",
+      "@type": "xsd:string"
+    },
+    "bio": {
+      "@id": "honesthook:bio",
+      "@type": "xsd:string"
+    },
+    "avatar_url": {
+      "@id": "honesthook:avatar_url",
+      "@type": "xsd:string"
+    },
+    "followers": {
+      "@id": "honesthook:followers",
+      "@type": "xsd:integer"
+    },
+    "following": {
+      "@id": "honesthook:following",
+      "@type": "xsd:integer"
+    },
+    "posts_count": {
+      "@id": "honesthook:posts_count",
+      "@type": "xsd:integer"
+    },
+    "verified": {
+      "@id": "honesthook:verified",
+      "@type": "xsd:boolean"
+    },
+    "is_private": {
+      "@id": "honesthook:is_private",
+      "@type": "xsd:boolean"
+    },
+    "external_url": {
+      "@id": "honesthook:external_url",
+      "@type": "xsd:string"
+    },
+    "PostItem": "honesthook:PostItem",
+    "text": {
+      "@id": "honesthook:text",
+      "@type": "xsd:string"
+    },
+    "text_html": {
+      "@id": "honesthook:text_html",
+      "@type": "xsd:string"
+    },
+    "published_at": {
+      "@id": "honesthook:published_at",
+      "@type": "xsd:dateTime"
+    },
+    "thumbnail_url": {
+      "@id": "honesthook:thumbnail_url",
+      "@type": "xsd:string"
+    },
+    "metrics": {
+      "@id": "honesthook:metrics"
+    },
+    "PostsEnvelope": "honesthook:PostsEnvelope",
+    "success": {
+      "@id": "honesthook:success",
+      "@type": "xsd:boolean"
+    },
+    "endpoint": {
+      "@id": "honesthook:endpoint",
+      "@type": "xsd:string"
+    },
+    "data": {
+      "@id": "honesthook:data"
+    },
+    "credits_used": {
+      "@id": "honesthook:credits_used",
+      "@type": "xsd:integer"
+    },
+    "cached": {
+      "@id": "honesthook:cached",
+      "@type": "xsd:boolean"
+    },
+    "request_id": {
+      "@id": "honesthook:request_id",
+      "@type": "xsd:string"
+    },
+    "ProfileEnvelope": "honesthook:ProfileEnvelope",
+    "credits_remaining": {
+      "@id": "honesthook:credits_remaining",
+      "@type": "xsd:integer"
+    },
+    "credits_purchased_remaining": {
+      "@id": "honesthook:credits_purchased_remaining",
+      "@type": "xsd:integer"
+    },
+    "free_credits_remaining": {
+      "@id": "honesthook:free_credits_remaining",
+      "@type": "xsd:integer"
+    },
+    "free_credits_total": {
+      "@id": "honesthook:free_credits_total",
+      "@type": "xsd:integer"
+    },
+    "free_credits_reset_at": {
+      "@id": "honesthook:free_credits_reset_at",
+      "@type": "xsd:dateTime"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "HonestHook API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects HonestHook's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-09-25) from openapi/_original/honesthook-api-openapi.json.",
+  "dcterms:created": "2026-09-25",
+  "dcterms:source": [
+    "openapi/_original/honesthook-api-openapi.json"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/honesthook/main/json-schema/honesthook-mover-schema.json",
+  "title": "Mover",
+  "description": "One item that GAINED points between the two compared windows. Items that lost points, and items present in only one of the two windows, are not in this list — losing is not traction, and an item with nothing to compare against has no delta.",
+  "x-generated": "2026-09-25",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/_original/honesthook-api-openapi.json#/components/schemas/Mover",
+  "type": "object",
+  "properties": {
+    "external_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "points": {
+      "type": "integer",
+      "description": "Score in the newest window."
+    },
+    "points_gained": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Newest score minus oldest. Always positive. THIS is the ranking key of the response — see the endpoint description for why it is not position."
+    },
+    "comments": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "position": {
+      "type": "integer",
+      "description": "Position in the newest window, carried for reference only. Do not rank by it and do not diff it across calls."
+    }
+  }
+}
