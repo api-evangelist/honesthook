@@ -65,16 +65,236 @@ common:
 - type: Blog
   url: https://honesthook.com/blog
 apis:
-- aid: honesthook:honesthook-api-api
-  name: HonestHook API API
-  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform
-    changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists.
-    Plus a historical trend a
+- aid: honesthook:honesthook-bluesky-api
+  name: HonestHook Bluesky API
+  description: The Bluesky API from HonestHook — 2 operation(s) for bluesky.
   humanURL: https://honesthook.com/docs
-  baseURL: https://honesthook.com
+  tags:
+  - Bluesky
   properties:
   - type: OpenAPI
-    url: openapi/_original/honesthook-api-openapi.json
+    url: openapi/honesthook-bluesky-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-github-api
+  name: HonestHook GitHub API
+  description: The Github API from HonestHook — 2 operation(s) for github.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Github
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-github-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-history-api
+  name: HonestHook History API
+  description: The History API from HonestHook — 1 operation(s) for history.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - History
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-history-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-instagram-api
+  name: HonestHook Instagram API
+  description: The Instagram API from HonestHook — 1 operation(s) for instagram.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Instagram
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-instagram-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-linktree-api
+  name: HonestHook Linktree API
+  description: The Linktree API from HonestHook — 1 operation(s) for linktree.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Linktree
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-linktree-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-mastodon-api
+  name: HonestHook Mastodon API
+  description: The Mastodon API from HonestHook — 2 operation(s) for mastodon.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Mastodon
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-mastodon-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-medium-api
+  name: HonestHook Medium API
+  description: The Medium API from HonestHook — 1 operation(s) for medium.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Medium
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-medium-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-movers-api
+  name: HonestHook Movers API
+  description: The Movers API from HonestHook — 1 operation(s) for movers.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Movers
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-movers-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-nichos-api
+  name: HonestHook Nichos API
+  description: The Nichos API from HonestHook — 1 operation(s) for nichos.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Nichos
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-nichos-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-pinterest-api
+  name: HonestHook Pinterest API
+  description: The Pinterest API from HonestHook — 1 operation(s) for pinterest.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Pinterest
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-pinterest-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-soundcloud-api
+  name: HonestHook Soundcloud API
+  description: The Soundcloud API from HonestHook — 1 operation(s) for soundcloud.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Soundcloud
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-soundcloud-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-threads-api
+  name: HonestHook Threads API
+  description: The Threads API from HonestHook — 2 operation(s) for threads.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Threads
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-threads-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-tiktok-api
+  name: HonestHook Tiktok API
+  description: The Tiktok API from HonestHook — 1 operation(s) for tiktok.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Tiktok
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-tiktok-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/honesthook-profile-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-posts-envelope-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-mover-schema.json
+  - type: JSONSchema
+    url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-trends-api
+  name: HonestHook Trends API
+  description: The Trends API from HonestHook — 1 operation(s) for trends.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Trends
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-trends-api-openapi.yml
   - type: JSONSchema
     url: json-schema/honesthook-profile-envelope-schema.json
   - type: JSONSchema

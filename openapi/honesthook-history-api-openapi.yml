@@ -1,0 +1,76 @@
+openapi: 3.2.0
+info:
+  title: HonestHook History API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: History
+paths:
+  /api/v1/{platform}/history:
+    get:
+      operationId: profileHistory
+      summary: Daily history of a profile we have already archived, for one platform
+      description: 'Serie historica de um perfil: uma linha por janela horaria em que o perfil foi consultado por alguem. Cobra 1 credito apenas quando ha pelo menos uma captura no intervalo.'
+      x-creditos: 1
+      parameters:
+      - name: platform
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: handle
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - History
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'

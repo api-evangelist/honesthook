@@ -1,0 +1,212 @@
+openapi: 3.2.0
+info:
+  title: HonestHook Trends API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Trends
+paths:
+  /api/v1/trends/{niche}:
+    get:
+      operationId: nicheTrends
+      summary: Historical series for one niche, grouped by item
+      x-credits: 1
+      x-charges-without-result: true
+      description: 'Grouped by ITEM, not by window. A window is how the archive stores; an item with a series is how the question is asked. Capped at 5000 series points and a 90-day span, both enforced in the database. When the cap is hit, `truncated` is true and the series is incomplete — narrow the interval rather than drawing conclusions from a partial series.
+
+
+        An unknown niche is NOT a 404: nothing validates the name, so a typo returns `items: []` with `points: 0` — AND still spends a call, because the quota counter increments before the archive is read. Resolve niche names at `/api/v1/nichos` first.'
+      parameters:
+      - name: niche
+        in: path
+        required: true
+        schema:
+          type: string
+        example: ai-agents
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: ISO 8601. Defaults to 7 days ago.
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: ISO 8601. Defaults to now.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Hint only. The hard cap lives in the database and a larger value here does not raise it.
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  niche:
+                    type: string
+                  from:
+                    type: string
+                    format: date-time
+                  to:
+                    type: string
+                    format: date-time
+                  points:
+                    type: integer
+                  truncated:
+                    type: boolean
+                  credits_charged:
+                    type: integer
+                  paid_from:
+                    type: string
+                    enum:
+                    - free
+                    - balance
+                    description: 'Which pocket paid: the monthly free allowance or purchased credits.'
+                  free_used:
+                    type: integer
+                  free_total:
+                    type: integer
+                  credits_balance:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '400':
+          description: Malformed interval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Missing or invalid key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '429':
+          description: Monthly quota exhausted. The body carries `limit` and `renews_at`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      tags:
+      - Trends
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        external_id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        platform:
+          type: string
+          example: hackernews
+        entered_at:
+          type: string
+          format: date-time
+        left_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: null while the item is still in the ranking.
+        best_position:
+          type: integer
+        movement:
+          type: integer
+          description: 'Oldest position minus newest. Positive means it climbed. Read this together with `points` in the series: a change of position with no change in points is a tie reshuffle, not a trend.'
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesPoint'
+    ApiError:
+      type: object
+      required:
+      - erro
+      properties:
+        error:
+          type: string
+          enum:
+          - chave_ausente
+          - chave_invalida
+          - intervalo_invalido
+          - parametro_invalido
+          - sem_creditos
+          - teto_estourado
+          - endpoint_indisponivel
+          - metodo_invalido
+          - indisponivel
+        message:
+          type: string
+        http:
+          type: integer
+          description: Echoed by errors that originate in the database. The real HTTP status is authoritative — do not branch on this field.
+        limit:
+          type: integer
+        renews_at:
+          type: string
+          format: date
+        credits_balance:
+          type: integer
+          description: '`sem_creditos` only: credits left on the key.'
+        needed:
+          type: integer
+          description: '`sem_creditos` only: credits the call would cost.'
+        spent_this_month:
+          type: integer
+          description: '`teto_estourado` only: credits spent this month.'
+        cap:
+          type: integer
+          description: '`teto_estourado` only: the monthly ceiling.'
+    SeriesPoint:
+      type: object
+      description: One observation of one item, in one hourly window.
+      properties:
+        window:
+          type: string
+          format: date-time
+          description: Rounded to the hour. This is the bucket, not the exact capture time — two runs in the same hour share a window.
+        position:
+          type: integer
+          description: 1 = top of the ranking.
+        points:
+          type:
+          - integer
+          - 'null'
+        comments:
+          type:
+          - integer
+          - 'null'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'

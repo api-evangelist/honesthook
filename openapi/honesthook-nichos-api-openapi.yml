@@ -1,0 +1,59 @@
+openapi: 3.2.0
+info:
+  title: HonestHook Nichos API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Nichos
+paths:
+  /api/v1/nichos:
+    get:
+      operationId: listNiches
+      summary: List available niches and how much history each has
+      security: []
+      x-credits: 0
+      x-charges-without-result: true
+      description: No API key required. Returns the niche labels and archive depth, never the archive itself.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  niches:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: ai-agents
+                        label:
+                          type: string
+                          example: AI agents
+                        windows_24h:
+                          type: integer
+                        last_window:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+      tags:
+      - Nichos
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'

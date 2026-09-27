@@ -1,0 +1,378 @@
+openapi: 3.2.0
+info:
+  title: HonestHook Threads API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Threads
+paths:
+  /api/v1/threads/profile:
+    get:
+      operationId: threadsProfile
+      summary: Public profile on threads, with the exact follower count
+      x-credits: 1
+      x-charges-without-result: false
+      description: 'One public profile, normalised into the same envelope as every other platform. Source: public page, logged out. Costs 1 credit; the answer is cached for an hour and a cache hit costs nothing (`cached: true`, `credits_used: 0`).
+
+
+        Threads username, same shape as Instagram: letters, digits, dot and underscore.'
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        description: 'Threads username, same shape as Instagram: letters, digits, dot and underscore.'
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9._]{1,30}$
+          example: zuck
+      responses:
+        '200':
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '400':
+          description: '`parametro_invalido` — the handle is missing or does not match this platform''s format. Nothing is charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '401':
+          description: '`chave_invalida` — key missing, unknown or inactive.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '402':
+          description: 'Out of credits. Two different types, and they mean different things: `sem_creditos` (both wallets are empty) and `teto_estourado` (the key has a monthly ceiling and hit it). Waiting does not help either one before the 1st — this is not a rate limit.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '404':
+          description: '`nao_encontrado` — no such profile on that platform.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '451':
+          description: '`bloqueado` — the platform refused us. The resource exists and YOUR key is fine; 403 would wrongly blame the caller.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '503':
+          description: '`indisponivel` — this endpoint is switched off in the catalogue, or a dependency of ours is down. Your key is fine.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+      tags:
+      - Threads
+  /api/v1/threads/posts:
+    get:
+      operationId: threadsPosts
+      summary: Recent posts on threads
+      x-credits: 1
+      x-charges-without-result: false
+      description: 'Posts recentes do proprio perfil no Threads, lidos do mesmo tipo de documento que threads/profile le -- mas o documento e BAIXADO DE NOVO: o cache e por endpoint+params, entao chamar as duas rotas para o mesmo handle busca duas vezes (medido 15/09/2026: 1,55s depois do profile contra 1,60s sem ele, cached:false nos dois). Devolve os posts que vieram na pagina, sem paginacao -- medido em tres handles: 4, 5 e 10. Nao aceita ?limit=. Post de terceiro citado no feed e excluido por user.username. Devolve likes, replies e reposts; quotes e sempre null (a fonte nao publica contagem de citacao). Nao devolve reshare_count (presente em 8 de 13 posts medidos) nem media_type (e inteiro e ainda nao foi decodificado).'
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        description: 'Threads username, same shape as Instagram: letters, digits, dot and underscore.'
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9._]{1,30}$
+          example: zuck
+      responses:
+        '200':
+          description: 'Posts found. `has_more` differs by platform: on Bluesky it is computed from the cursor the source returns, so it can be true. On Mastodon it is false today because we do not yet read the `Link` header. On Threads it is null — the posts arrive inside the profile document and there is nothing to page, so we cannot know. `null` means unknown, never `no more`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsEnvelope'
+        '400':
+          description: '`parametro_invalido` — the handle is missing, does not match this platform''s format, or `limit` is outside the range. Nothing is charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsEnvelope'
+        '401':
+          description: '`chave_invalida` — key missing, unknown or inactive.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsEnvelope'
+        '404':
+          description: '`nao_encontrado` — no such account. Nothing is charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsEnvelope'
+      tags:
+      - Threads
+components:
+  schemas:
+    ProfileEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - credits_remaining
+      - cached
+      - request_id
+      description: Identical shape on success and on error, so a client writes one parser. `success` is the only field that decides; `data` and `error` are mutually exclusive and the other is null, never absent.
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                type: object
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+          properties:
+            type:
+              type: string
+              enum:
+              - parametro_invalido
+              - chave_invalida
+              - sem_creditos
+              - teto_estourado
+              - nao_encontrado
+              - bloqueado
+              - indisponivel
+              description: Branch on this, never on the message text.
+            message:
+              type: string
+            details:
+              type:
+              - object
+              - 'null'
+        credits_used:
+          type: integer
+        credits_remaining:
+          type:
+          - integer
+          - 'null'
+          description: 'THE SUM: purchased balance plus what is left of this month''s free allowance. This is the only number that answers "can I call again" — it is not 0 while you can still call. null means we could not read it, which is not the same as zero.'
+        credits_purchased_remaining:
+          type:
+          - integer
+          - 'null'
+          description: Bought credits. These never expire.
+        free_credits_remaining:
+          type:
+          - integer
+          - 'null'
+          description: What is left of this month's free allowance.
+        free_credits_total:
+          type:
+          - integer
+          - 'null'
+          description: The monthly free allowance for this key.
+        free_credits_reset_at:
+          type: string
+          format: date-time
+          description: 'When the free allowance resets: 00:00 UTC on the 1st. It is here so the sum dropping at the turn of the month is expected rather than a surprise.'
+        cached:
+          type: boolean
+          description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
+        request_id:
+          type: string
+    PostItem:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type:
+          - string
+          - 'null'
+        text:
+          type:
+          - string
+          - 'null'
+        text_html:
+          type:
+          - string
+          - 'null'
+          description: Mastodon only. Third-party HTML, unsanitised — sanitise before rendering or you have an XSS hole. `text` is the same content already stripped.
+        title:
+          type: 'null'
+          description: 'Always null: a status has no title.'
+        position:
+          type: 'null'
+          description: 'Always null: chronological order is not a ranking.'
+        published_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        thumbnail_url:
+          type:
+          - string
+          - 'null'
+          description: Null on bluesky and mastodon — the image embed has not been measured on a large enough sample to promise a shape.
+        metrics:
+          type: object
+          properties:
+            likes:
+              type:
+              - integer
+              - 'null'
+            replies:
+              type:
+              - integer
+              - 'null'
+            reposts:
+              type:
+              - integer
+              - 'null'
+            quotes:
+              type:
+              - integer
+              - 'null'
+              description: 'Null on threads: the source publishes none.'
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
+    PostsEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - cached
+      - request_id
+      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/PostItem'
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+        credits_used:
+          type: integer
+        cached:
+          type: boolean
+        request_id:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'

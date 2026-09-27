@@ -1,0 +1,233 @@
+openapi: 3.2.0
+info:
+  title: HonestHook Linktree API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Linktree
+paths:
+  /api/v1/linktree/profile:
+    get:
+      operationId: linktreeProfile
+      summary: Public profile on linktree, with the exact follower count
+      x-credits: 1
+      x-charges-without-result: false
+      description: 'One public profile, normalised into the same envelope as every other platform. Source: public page, logged out. Costs 1 credit; the answer is cached for an hour and a cache hit costs nothing (`cached: true`, `credits_used: 0`).
+
+
+        Linktree username: letters, digits, dot, hyphen and underscore.'
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        description: 'Linktree username: letters, digits, dot, hyphen and underscore.'
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9._-]{1,60}$
+          example: comedycentral
+      responses:
+        '200':
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '400':
+          description: '`parametro_invalido` — the handle is missing or does not match this platform''s format. Nothing is charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '401':
+          description: '`chave_invalida` — key missing, unknown or inactive.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '402':
+          description: 'Out of credits. Two different types, and they mean different things: `sem_creditos` (both wallets are empty) and `teto_estourado` (the key has a monthly ceiling and hit it). Waiting does not help either one before the 1st — this is not a rate limit.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '404':
+          description: '`nao_encontrado` — no such profile on that platform.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '451':
+          description: '`bloqueado` — the platform refused us. The resource exists and YOUR key is fine; 403 would wrongly blame the caller.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '503':
+          description: '`indisponivel` — this endpoint is switched off in the catalogue, or a dependency of ours is down. Your key is fine.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+      tags:
+      - Linktree
+components:
+  schemas:
+    ProfileEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - credits_remaining
+      - cached
+      - request_id
+      description: Identical shape on success and on error, so a client writes one parser. `success` is the only field that decides; `data` and `error` are mutually exclusive and the other is null, never absent.
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                type: object
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+          properties:
+            type:
+              type: string
+              enum:
+              - parametro_invalido
+              - chave_invalida
+              - sem_creditos
+              - teto_estourado
+              - nao_encontrado
+              - bloqueado
+              - indisponivel
+              description: Branch on this, never on the message text.
+            message:
+              type: string
+            details:
+              type:
+              - object
+              - 'null'
+        credits_used:
+          type: integer
+        credits_remaining:
+          type:
+          - integer
+          - 'null'
+          description: 'THE SUM: purchased balance plus what is left of this month''s free allowance. This is the only number that answers "can I call again" — it is not 0 while you can still call. null means we could not read it, which is not the same as zero.'
+        credits_purchased_remaining:
+          type:
+          - integer
+          - 'null'
+          description: Bought credits. These never expire.
+        free_credits_remaining:
+          type:
+          - integer
+          - 'null'
+          description: What is left of this month's free allowance.
+        free_credits_total:
+          type:
+          - integer
+          - 'null'
+          description: The monthly free allowance for this key.
+        free_credits_reset_at:
+          type: string
+          format: date-time
+          description: 'When the free allowance resets: 00:00 UTC on the 1st. It is here so the sum dropping at the turn of the month is expected rather than a surprise.'
+        cached:
+          type: boolean
+          description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
+        request_id:
+          type: string
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'
