@@ -116,6 +116,25 @@ paths:
       - Trends
 components:
   schemas:
+    SeriesPoint:
+      type: object
+      description: One observation of one item, in one hourly window.
+      properties:
+        window:
+          type: string
+          format: date-time
+          description: Rounded to the hour. This is the bucket, not the exact capture time — two runs in the same hour share a window.
+        position:
+          type: integer
+          description: 1 = top of the ranking.
+        points:
+          type:
+          - integer
+          - 'null'
+        comments:
+          type:
+          - integer
+          - 'null'
     Item:
       type: object
       properties:
@@ -186,25 +205,6 @@ components:
         cap:
           type: integer
           description: '`teto_estourado` only: the monthly ceiling.'
-    SeriesPoint:
-      type: object
-      description: One observation of one item, in one hourly window.
-      properties:
-        window:
-          type: string
-          format: date-time
-          description: Rounded to the hour. This is the bucket, not the exact capture time — two runs in the same hour share a window.
-        position:
-          type: integer
-          description: 1 = top of the ranking.
-        points:
-          type:
-          - integer
-          - 'null'
-        comments:
-          type:
-          - integer
-          - 'null'
   securitySchemes:
     bearerAuth:
       type: http

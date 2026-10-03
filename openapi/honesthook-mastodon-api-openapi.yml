@@ -133,6 +133,161 @@ paths:
       - Mastodon
 components:
   schemas:
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
+    PostItem:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type:
+          - string
+          - 'null'
+        text:
+          type:
+          - string
+          - 'null'
+        text_html:
+          type:
+          - string
+          - 'null'
+          description: Mastodon only. Third-party HTML, unsanitised — sanitise before rendering or you have an XSS hole. `text` is the same content already stripped.
+        title:
+          type: 'null'
+          description: 'Always null: a status has no title.'
+        position:
+          type: 'null'
+          description: 'Always null: chronological order is not a ranking.'
+        published_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        thumbnail_url:
+          type:
+          - string
+          - 'null'
+          description: Null on bluesky and mastodon — the image embed has not been measured on a large enough sample to promise a shape.
+        metrics:
+          type: object
+          properties:
+            likes:
+              type:
+              - integer
+              - 'null'
+            replies:
+              type:
+              - integer
+              - 'null'
+            reposts:
+              type:
+              - integer
+              - 'null'
+            quotes:
+              type:
+              - integer
+              - 'null'
+              description: 'Null on threads: the source publishes none.'
+    PostsEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - cached
+      - request_id
+      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/PostItem'
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+        credits_used:
+          type: integer
+        cached:
+          type: boolean
+        request_id:
+          type: string
     ProfileEnvelope:
       type: object
       required:
@@ -223,161 +378,6 @@ components:
         cached:
           type: boolean
           description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
-        request_id:
-          type: string
-    PostItem:
-      type: object
-      properties:
-        id:
-          type: string
-        url:
-          type:
-          - string
-          - 'null'
-        text:
-          type:
-          - string
-          - 'null'
-        text_html:
-          type:
-          - string
-          - 'null'
-          description: Mastodon only. Third-party HTML, unsanitised — sanitise before rendering or you have an XSS hole. `text` is the same content already stripped.
-        title:
-          type: 'null'
-          description: 'Always null: a status has no title.'
-        position:
-          type: 'null'
-          description: 'Always null: chronological order is not a ranking.'
-        published_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        thumbnail_url:
-          type:
-          - string
-          - 'null'
-          description: Null on bluesky and mastodon — the image embed has not been measured on a large enough sample to promise a shape.
-        metrics:
-          type: object
-          properties:
-            likes:
-              type:
-              - integer
-              - 'null'
-            replies:
-              type:
-              - integer
-              - 'null'
-            reposts:
-              type:
-              - integer
-              - 'null'
-            quotes:
-              type:
-              - integer
-              - 'null'
-              description: 'Null on threads: the source publishes none.'
-    Author:
-      type: object
-      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Stable identifier on that platform.
-        handle:
-          type:
-          - string
-          - 'null'
-        name:
-          type:
-          - string
-          - 'null'
-        bio:
-          type:
-          - string
-          - 'null'
-        avatar_url:
-          type:
-          - string
-          - 'null'
-        followers:
-          type:
-          - integer
-          - 'null'
-        following:
-          type:
-          - integer
-          - 'null'
-        posts_count:
-          type:
-          - integer
-          - 'null'
-        verified:
-          type:
-          - boolean
-          - 'null'
-        is_private:
-          type:
-          - boolean
-          - 'null'
-        external_url:
-          type:
-          - string
-          - 'null'
-        url:
-          type:
-          - string
-          - 'null'
-    PostsEnvelope:
-      type: object
-      required:
-      - success
-      - platform
-      - endpoint
-      - data
-      - error
-      - credits_used
-      - cached
-      - request_id
-      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
-      properties:
-        success:
-          type: boolean
-        platform:
-          type: string
-        endpoint:
-          type: string
-        data:
-          type:
-          - object
-          - 'null'
-          properties:
-            author:
-              $ref: '#/components/schemas/Author'
-            items:
-              type: array
-              items:
-                $ref: '#/components/schemas/PostItem'
-            has_more:
-              type:
-              - boolean
-              - 'null'
-            next_cursor:
-              type:
-              - string
-              - 'null'
-        error:
-          type:
-          - object
-          - 'null'
-        credits_used:
-          type: integer
-        cached:
-          type: boolean
         request_id:
           type: string
   securitySchemes:

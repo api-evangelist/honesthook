@@ -126,6 +126,32 @@ paths:
       - Movers
 components:
   schemas:
+    Mover:
+      type: object
+      description: One item that GAINED points between the two compared windows. Items that lost points, and items present in only one of the two windows, are not in this list — losing is not traction, and an item with nothing to compare against has no delta.
+      properties:
+        external_id:
+          type: string
+          example: '49569136'
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        points:
+          type: integer
+          description: Score in the newest window.
+        points_gained:
+          type: integer
+          minimum: 1
+          description: Newest score minus oldest. Always positive. THIS is the ranking key of the response — see the endpoint description for why it is not position.
+        comments:
+          type:
+          - integer
+          - 'null'
+        position:
+          type: integer
+          description: Position in the newest window, carried for reference only. Do not rank by it and do not diff it across calls.
     ApiError:
       type: object
       required:
@@ -165,32 +191,6 @@ components:
         cap:
           type: integer
           description: '`teto_estourado` only: the monthly ceiling.'
-    Mover:
-      type: object
-      description: One item that GAINED points between the two compared windows. Items that lost points, and items present in only one of the two windows, are not in this list — losing is not traction, and an item with nothing to compare against has no delta.
-      properties:
-        external_id:
-          type: string
-          example: '49569136'
-        title:
-          type: string
-        url:
-          type: string
-          format: uri
-        points:
-          type: integer
-          description: Score in the newest window.
-        points_gained:
-          type: integer
-          minimum: 1
-          description: Newest score minus oldest. Always positive. THIS is the ranking key of the response — see the endpoint description for why it is not position.
-        comments:
-          type:
-          - integer
-          - 'null'
-        position:
-          type: integer
-          description: Position in the newest window, carried for reference only. Do not rank by it and do not diff it across calls.
   securitySchemes:
     bearerAuth:
       type: http

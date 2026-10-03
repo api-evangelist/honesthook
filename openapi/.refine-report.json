@@ -57,7 +57,22 @@
     "honesthook-api-openapi.json: declared missing tag: Threads",
     "honesthook-api-openapi.json: declared missing tag: Tiktok",
     "honesthook-api-openapi.json: declared missing tag: Trends",
-    "apis.yml register: written (+14 apis, 14 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "honesthook-bluesky-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-github-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-history-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-instagram-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-linktree-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-mastodon-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-medium-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-movers-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-nichos-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-pinterest-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-soundcloud-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-threads-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-tiktok-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "honesthook-trends-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
