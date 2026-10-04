@@ -14,6 +14,11 @@ created: '2026-09-25'
 modified: '2026-09-25'
 tags:
 - Company
+- Social Media
+- Data Aggregation
+- Software-as-a-Service
+tags_raw:
+- Company
 - API
 - Social Media
 - Data Aggregation
@@ -24,6 +29,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/honesthook-capability-edges.yml
+  name: HonestHook Business Capability Map
 - type: Spectral
   url: rules/honesthook-rules.yml
 - type: JSONLD
@@ -87,6 +95,8 @@ apis:
   description: The Github API from HonestHook — 2 operation(s) for github.
   humanURL: https://honesthook.com/docs
   tags:
+  - GitHub
+  tags_raw:
   - Github
   properties:
   - type: OpenAPI
@@ -240,6 +250,8 @@ apis:
   description: The Soundcloud API from HonestHook — 1 operation(s) for soundcloud.
   humanURL: https://honesthook.com/docs
   tags:
+  - SoundCloud
+  tags_raw:
   - Soundcloud
   properties:
   - type: OpenAPI
@@ -274,6 +286,8 @@ apis:
   description: The Tiktok API from HonestHook — 1 operation(s) for tiktok.
   humanURL: https://honesthook.com/docs
   tags:
+  - TikTok
+  tags_raw:
   - Tiktok
   properties:
   - type: OpenAPI
