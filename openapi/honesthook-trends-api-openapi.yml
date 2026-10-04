@@ -135,37 +135,6 @@ components:
           type:
           - integer
           - 'null'
-    Item:
-      type: object
-      properties:
-        external_id:
-          type: string
-        title:
-          type: string
-        url:
-          type: string
-          format: uri
-        platform:
-          type: string
-          example: hackernews
-        entered_at:
-          type: string
-          format: date-time
-        left_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: null while the item is still in the ranking.
-        best_position:
-          type: integer
-        movement:
-          type: integer
-          description: 'Oldest position minus newest. Positive means it climbed. Read this together with `points` in the series: a change of position with no change in points is a tie reshuffle, not a trend.'
-        series:
-          type: array
-          items:
-            $ref: '#/components/schemas/SeriesPoint'
     ApiError:
       type: object
       required:
@@ -205,6 +174,37 @@ components:
         cap:
           type: integer
           description: '`teto_estourado` only: the monthly ceiling.'
+    Item:
+      type: object
+      properties:
+        external_id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        platform:
+          type: string
+          example: hackernews
+        entered_at:
+          type: string
+          format: date-time
+        left_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: null while the item is still in the ranking.
+        best_position:
+          type: integer
+        movement:
+          type: integer
+          description: 'Oldest position minus newest. Positive means it climbed. Read this together with `points` in the series: a change of position with no change in points is a tie reshuffle, not a trend.'
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesPoint'
   securitySchemes:
     bearerAuth:
       type: http

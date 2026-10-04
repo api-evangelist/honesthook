@@ -177,6 +177,54 @@ components:
           type:
           - string
           - 'null'
+    PostsEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - cached
+      - request_id
+      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/PostItem'
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+        credits_used:
+          type: integer
+        cached:
+          type: boolean
+        request_id:
+          type: string
     PostItem:
       type: object
       properties:
@@ -231,54 +279,6 @@ components:
               - integer
               - 'null'
               description: 'Null on threads: the source publishes none.'
-    PostsEnvelope:
-      type: object
-      required:
-      - success
-      - platform
-      - endpoint
-      - data
-      - error
-      - credits_used
-      - cached
-      - request_id
-      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
-      properties:
-        success:
-          type: boolean
-        platform:
-          type: string
-        endpoint:
-          type: string
-        data:
-          type:
-          - object
-          - 'null'
-          properties:
-            author:
-              $ref: '#/components/schemas/Author'
-            items:
-              type: array
-              items:
-                $ref: '#/components/schemas/PostItem'
-            has_more:
-              type:
-              - boolean
-              - 'null'
-            next_cursor:
-              type:
-              - string
-              - 'null'
-        error:
-          type:
-          - object
-          - 'null'
-        credits_used:
-          type: integer
-        cached:
-          type: boolean
-        request_id:
-          type: string
     ProfileEnvelope:
       type: object
       required:
