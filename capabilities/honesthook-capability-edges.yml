@@ -1,0 +1,25 @@
+slug: honesthook
+provider: HonestHook
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 1
+edges:
+- tag: Movers
+  spec_file: honesthook-movers-api-openapi.yml
+  capability_id: BC-400.30
+  capability_id_l1: BC-400
+  capability_name: Market Intelligence Management
+  confidence: 0.75
+  evidence: GET /api/v1/movers/{niche} — "What gained traction in a niche — charged only when it finds
+    movement"; schema Mover
+  reason: Explicitly detects and returns what is gaining traction within a niche — trend and competitive
+    movement detection, the clearest Market Intelligence Management evidence in this spec.
