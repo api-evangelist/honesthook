@@ -17,3 +17,22 @@ plans:
   price: 79
   description: 60,000 credits
 docs: https://honesthook.com/pricing
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - subscription
+  units: []
+  plans:
+  - name: Monthly
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
+  - name: Yearly
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods: []
