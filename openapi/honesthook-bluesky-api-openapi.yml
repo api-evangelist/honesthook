@@ -131,163 +131,79 @@ paths:
                 $ref: '#/components/schemas/PostsEnvelope'
       tags:
       - Bluesky
+  /api/v1/bluesky/post:
+    get:
+      operationId: blueskyPost
+      summary: A single Bluesky post by its AT Protocol URI, with likes, reposts, replies and…
+      description: 'A single Bluesky post, addressed by its AT Protocol URI (at://did:plc:.../app.bsky.feed.post/...). Returns the post as a one-item list, with likes, replies, reposts and quotes, plus the post author in the author envelope. Read from app.bsky.feed.getPostThread, the same public surface bluesky/profile uses -- no login, no third party. Measured on 2026-10-01 against the committed 289 KB thread fixture. Does NOT return the replies: the document carries 193 of them and we deliberately leave them out, because mixing a post with its replies in one list would make both unreadable; a replies endpoint would be its own call. There is no legitimate empty result here -- either the post was read or it was not, so a failure is an error and never an empty list, and a failed read is not charged. Followers and bio are null: this call does not carry them, which is different from the account not having them. title is null because a Bluesky post has none. Costs 1 credit and caches for an hour.'
+      x-creditos: 1
+      parameters:
+      - name: uri
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Bluesky
+  /api/v1/bluesky/search:
+    get:
+      operationId: blueskySearch
+      summary: Public Bluesky posts matching a term, ranked by top, with likes, reposts…
+      description: 'Public Bluesky posts matching a TERM, via app.bsky.feed.searchPosts -- the official AT Protocol API, no key and no account. FOURTH and last Bluesky path of the parity grid. THE HOST IS api.bsky.app, NOT public.api.bsky.app, and that difference is the whole endpoint: public.api.bsky.app answers 403 with an HTML block page on this route while answering 200 on getAuthorFeed, so the block is per-host, not the endpoint asking for an account -- our own archiver has searched through api.bsky.app since 06/09/2026. Results come from MANY authors, so unlike bluesky/posts there is no authorship filter; filtering by author here would always return empty. sort=top, not latest: on a popular term latest is almost all noise. hitsTotal IS NOT RETURNED -- measured, it reads 10000 for a common term and 0 for a nonexistent one, so it is a search cap dressed as a total, and serving it would promise a count nobody measured; sample_size says how many THIS call brought. Accepts ?limit= from 1 to 100, default 25; out of range is 400, never silently clamped -- measured, the source REFUSES limit=101 with 400 instead of trimming. has_more is Boolean(cursor) and nothing else. A term with no result is 200 with an empty items list -- that is an answer, and it is charged.'
+      x-creditos: 1
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Bluesky
 components:
   schemas:
-    PostsEnvelope:
-      type: object
-      required:
-      - success
-      - platform
-      - endpoint
-      - data
-      - error
-      - credits_used
-      - cached
-      - request_id
-      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
-      properties:
-        success:
-          type: boolean
-        platform:
-          type: string
-        endpoint:
-          type: string
-        data:
-          type:
-          - object
-          - 'null'
-          properties:
-            author:
-              $ref: '#/components/schemas/Author'
-            items:
-              type: array
-              items:
-                $ref: '#/components/schemas/PostItem'
-            has_more:
-              type:
-              - boolean
-              - 'null'
-            next_cursor:
-              type:
-              - string
-              - 'null'
-        error:
-          type:
-          - object
-          - 'null'
-        credits_used:
-          type: integer
-        cached:
-          type: boolean
-        request_id:
-          type: string
-    Author:
-      type: object
-      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Stable identifier on that platform.
-        handle:
-          type:
-          - string
-          - 'null'
-        name:
-          type:
-          - string
-          - 'null'
-        bio:
-          type:
-          - string
-          - 'null'
-        avatar_url:
-          type:
-          - string
-          - 'null'
-        followers:
-          type:
-          - integer
-          - 'null'
-        following:
-          type:
-          - integer
-          - 'null'
-        posts_count:
-          type:
-          - integer
-          - 'null'
-        verified:
-          type:
-          - boolean
-          - 'null'
-        is_private:
-          type:
-          - boolean
-          - 'null'
-        external_url:
-          type:
-          - string
-          - 'null'
-        url:
-          type:
-          - string
-          - 'null'
-    PostItem:
-      type: object
-      properties:
-        id:
-          type: string
-        url:
-          type:
-          - string
-          - 'null'
-        text:
-          type:
-          - string
-          - 'null'
-        text_html:
-          type:
-          - string
-          - 'null'
-          description: Mastodon only. Third-party HTML, unsanitised — sanitise before rendering or you have an XSS hole. `text` is the same content already stripped.
-        title:
-          type: 'null'
-          description: 'Always null: a status has no title.'
-        position:
-          type: 'null'
-          description: 'Always null: chronological order is not a ranking.'
-        published_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        thumbnail_url:
-          type:
-          - string
-          - 'null'
-          description: Null on bluesky and mastodon — the image embed has not been measured on a large enough sample to promise a shape.
-        metrics:
-          type: object
-          properties:
-            likes:
-              type:
-              - integer
-              - 'null'
-            replies:
-              type:
-              - integer
-              - 'null'
-            reposts:
-              type:
-              - integer
-              - 'null'
-            quotes:
-              type:
-              - integer
-              - 'null'
-              description: 'Null on threads: the source publishes none.'
     ProfileEnvelope:
       type: object
       required:
@@ -378,6 +294,161 @@ components:
         cached:
           type: boolean
           description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
+        request_id:
+          type: string
+    PostItem:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type:
+          - string
+          - 'null'
+        text:
+          type:
+          - string
+          - 'null'
+        text_html:
+          type:
+          - string
+          - 'null'
+          description: Mastodon only. Third-party HTML, unsanitised — sanitise before rendering or you have an XSS hole. `text` is the same content already stripped.
+        title:
+          type: 'null'
+          description: 'Always null: a status has no title.'
+        position:
+          type: 'null'
+          description: 'Always null: chronological order is not a ranking.'
+        published_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        thumbnail_url:
+          type:
+          - string
+          - 'null'
+          description: Null on bluesky and mastodon — the image embed has not been measured on a large enough sample to promise a shape.
+        metrics:
+          type: object
+          properties:
+            likes:
+              type:
+              - integer
+              - 'null'
+            replies:
+              type:
+              - integer
+              - 'null'
+            reposts:
+              type:
+              - integer
+              - 'null'
+            quotes:
+              type:
+              - integer
+              - 'null'
+              description: 'Null on threads: the source publishes none.'
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
+    PostsEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - cached
+      - request_id
+      description: 'Same envelope as every other route. `data.items` carries the posts the account itself wrote — reposts and boosts of other people are excluded by authorship. `has_more` is per platform, not one answer for all three: Bluesky computes it from the source cursor, Mastodon reports false until we read the `Link` header, and Threads reports null because its posts come inside the profile document and cannot be paged. A null is us saying we do not know, which is different from saying there is no more.'
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/PostItem'
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+        credits_used:
+          type: integer
+        cached:
+          type: boolean
         request_id:
           type: string
   securitySchemes:

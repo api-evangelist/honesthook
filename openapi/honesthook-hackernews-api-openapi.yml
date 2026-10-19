@@ -1,0 +1,160 @@
+openapi: 3.2.0
+info:
+  title: HonestHook Hackernews API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Hackernews
+paths:
+  /api/v1/hackernews/search:
+    get:
+      operationId: hackernewsSearch
+      summary: Hacker News stories matching a term, with points and comments
+      description: 'Busca de historias no Hacker News por TERMO, via hn.algolia.com -- API publica, documentada, sem chave e sem conta. PRIMEIRA rota da casa que nao pergunta por uma pessoa: o parametro e ?q=, nao ?handle=. Usa o MESMO cliente HTTP do arquivador (lib/fontes/hackernews.js), que desde 05/09/2026 carrega o que custou caro descobrir: o Algolia nao interpreta OR, e com typoTolerance ligada o termo mrr devolvia 81 resultados e nenhum sobre MRR. Um segundo cliente devolveria ao cliente pagante o lixo que o arquivador aprendeu a recusar. Sem a janela de 48h do arquivador: quem busca quer o que existe, nao o que subiu anteontem. Aceita ?limit= de 1 a 100, padrao 25; fora da faixa e 400, nao aparado. Termo sem resultado e 200 com items vazio -- e uma resposta, e e cobrada. author NAO sai: existe na resposta do Algolia, esta na fixture de proposito, e o teste reprova se vazar.'
+      x-creditos: 1
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Hackernews
+  /api/v1/hackernews/story:
+    get:
+      operationId: hackernewsStory
+      summary: One Hacker News story by id — the story, not the comments
+      description: 'UMA historia do Hacker News pelo id, via hn.algolia.com/api/v1/items/{id}. DESCARTA OS COMENTARIOS por decisao: medido em 30/09/2026 no item 46990729, a resposta tem 489.835 bytes e 176 comentarios, cada um com author e text de uma pessoa que nao e o cliente e nao pediu nada. Sobrevive metrics.comments, que e a CONTAGEM -- mede sem identificar; quando children nao vem e null, nunca 0. num_comments NAO existe neste endpoint (a busca tem o contador, o item nao), por isso a contagem sai de children.length. Comentario nao e historia: /items/{id} responde 200 para os dois, e o comentario vem com title null -- sem a ancora do normalizador o cliente receberia texto de terceiro com success true. Com ela, 404. id aceita ate 12 digitos e nada mais.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Hackernews
+  /api/v1/hackernews/profile:
+    get:
+      operationId: hackernewsProfile
+      summary: 'Public Hacker News user: karma, the about text, and nothing invented'
+      description: 'A public Hacker News user via hn.algolia.com/api/v1/users/{handle}: karma and the about text, and nothing invented. KARMA IS ITS OWN FIELD, not followers. Hacker News has no follower graph -- followers, following and posts_count are all null here -- and mapping karma onto followers would put a plausible value in the wrong field, stable enough that a client comparing audience across platforms would read karma as reach. The anchor is handle, NEVER karma: a new account legitimately has karma 0, and treating 0 as absent would report a real user as missing. A user that does not exist is a real 404 and costs no credit.'
+      x-creditos: 1
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Hackernews
+  /api/v1/hackernews/story/comments:
+    get:
+      operationId: hackernewsStoryComments
+      summary: Comments on a Hacker News story, flattened, with depth and parent id
+      description: 'The comments on a Hacker News story, flattened, each with depth and parent id. SAME UPSTREAM DOCUMENT as hackernews/story -- hn.algolia.com/api/v1/items/{id} already carries the comment tree in children, and the story route discards it on purpose. There is no new upstream call here; there is exposure of what already arrived. Measured on item 8863: 32 children, 104 points. An empty list is an answer (a story with no comments is charged, the question was answered); an id that does not exist is a real 404 and costs no credit. THE ANCHOR HERE IS id, NOT title: /items/{id} answers 200 for a story and for a comment alike, and this route requires only id -- measured, a comment id is accepted with 200 and comes back with the replies to THAT comment and title null. Whoever needs to tell a story from a comment has to read title in the response, because this route does not do it for them. The sibling route hackernews/story DOES refuse a comment, because it requires title.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Hackernews
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'

@@ -117,61 +117,226 @@ paths:
           description: See the shared error shape.
       tags:
       - Github
+  /api/v1/github/repo:
+    get:
+      operationId: githubRepo
+      summary: One public GitHub repository, with the source's own field names — stars, forks…
+      description: 'One public GitHub repository. Fields keep the SOURCE names -- stargazers_count, forks_count, open_issues_count, watchers_count, language, topics, archived, fork -- because a repository is not a post and a star is not a like. WARNING: watchers_count equals stargazers_count in the API; real watchers are in subscribers_count, which this endpoint does not return. A renamed repository answers 200 under its NEW name: we compare full_name with what you asked and give 404 if they differ, instead of serving the redirect silently.'
+      x-creditos: 1
+      parameters:
+      - name: repo
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Github
+  /api/v1/github/repo/issues:
+    get:
+      operationId: githubRepoIssues
+      summary: The issues of a GitHub repository AND its pull requests, which the API counts…
+      description: 'The issues of a GitHub repository AND its pull requests. The GitHub API counts every PR as an issue: MEASURED, 8 of the 10 items it returned were PRs. Each item carries is_pull_request (from the presence of the pull_request key) and a url that reads /pull/N or /issues/N. We do NOT filter the PRs out -- hiding 8 of 10 items would surprise more than labelling them. state=all, so closed issues come too.'
+      x-creditos: 1
+      parameters:
+      - name: repo
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Github
+  /api/v1/github/repo/readme:
+    get:
+      operationId: githubRepoReadme
+      summary: The README of a GitHub repository, decoded from the base64 the API returns
+      description: The README of a GitHub repository, DECODED from the base64 the API returns. The endpoint resolves which file is the README (readme.md, README, .github/README.md) and the answer says which one it was, in name and path. If the API declares an encoding other than base64 -- which it does for large files -- content is null and encoding comes through as it arrived, instead of an empty string served as a README.
+      x-creditos: 1
+      parameters:
+      - name: repo
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Github
+  /api/v1/github/repo/releases:
+    get:
+      operationId: githubRepoReleases
+      summary: The releases of a GitHub repository, each saying whether it is a prerelease…
+      description: 'The releases of a GitHub repository. Every item says prerelease and draft, and that is not decoration: MEASURED, seven of ten were prereleases and the most recent one was a canary. assets is the COUNT of attached files, not the files. reactions keeps the GitHub names, and total_count is NOT likes -- measured, a release with total_count 3 had one +1 and two hooray.'
+      x-creditos: 1
+      parameters:
+      - name: repo
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Github
+  /api/v1/github/issue:
+    get:
+      operationId: githubIssue
+      summary: One GitHub issue or pull request by number — the same path serves both, and the…
+      description: 'One GitHub issue OR pull request by number -- the same API path serves both and there is no issue-only endpoint. The item says which, through is_pull_request and through the url. number is REQUIRED and has no default: there is no such thing as a default issue, and guessing 1 would serve the wrong one with a 200.'
+      x-creditos: 1
+      parameters:
+      - name: repo
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: number
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Github
+  /api/v1/github/issue/comments:
+    get:
+      operationId: githubIssueComments
+      summary: The conversation comments on a GitHub issue or pull request — text, date and…
+      description: 'The conversation comments on a GitHub issue or pull request: text, dates and reactions. WHO WROTE EACH ONE IS NOT RETURNED -- login, avatar and profile url arrive in the response and are discarded, and so is author_association, which is an attribute of the person. Code REVIEW comments on a PR live at another endpoint and are not here. An empty list is an answer; an issue that does not exist is a real 404.'
+      x-creditos: 1
+      parameters:
+      - name: repo
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: number
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Github
 components:
   schemas:
-    Author:
-      type: object
-      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Stable identifier on that platform.
-        handle:
-          type:
-          - string
-          - 'null'
-        name:
-          type:
-          - string
-          - 'null'
-        bio:
-          type:
-          - string
-          - 'null'
-        avatar_url:
-          type:
-          - string
-          - 'null'
-        followers:
-          type:
-          - integer
-          - 'null'
-        following:
-          type:
-          - integer
-          - 'null'
-        posts_count:
-          type:
-          - integer
-          - 'null'
-        verified:
-          type:
-          - boolean
-          - 'null'
-        is_private:
-          type:
-          - boolean
-          - 'null'
-        external_url:
-          type:
-          - string
-          - 'null'
-        url:
-          type:
-          - string
-          - 'null'
     ProfileEnvelope:
       type: object
       required:
@@ -264,6 +429,59 @@ components:
           description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
         request_id:
           type: string
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
   securitySchemes:
     bearerAuth:
       type: http

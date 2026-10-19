@@ -79,61 +79,173 @@ paths:
                 $ref: '#/components/schemas/ProfileEnvelope'
       tags:
       - Instagram
+  /api/v1/instagram/highlights:
+    get:
+      operationId: instagramHighlights
+      summary: Story highlight covers of a public Instagram profile — id, title and cover
+      description: 'The story highlight tray of a public Instagram profile: id, title and cover image for each highlight, read from the SAME logged-out profile page as instagram/profile. Measured on 2026-10-01 against the committed 829 KB page for nasa: 5 highlights, and has_next_page false -- so that is the whole tray, and has_more says so. Does NOT return the media inside a highlight: opening one needs a logged-in session, so no logged-out surface carries it. No date and no counter per highlight -- the tray has neither, so both are null. next_cursor is null even though the page carries an end_cursor: no parameter here accepts one, and paging the tray would mean calling Instagram GraphQL, another surface. position is null on purpose -- Instagram orders the tray by recent update, not the owner. Costs 1 credit and caches for an hour; the cache is per endpoint and params, so asking for profile and highlights on the same handle downloads the page twice.'
+      x-creditos: 1
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Instagram
+  /api/v1/instagram/embed:
+    get:
+      operationId: instagramEmbed
+      summary: 'What an Instagram embed shows: the profile plus the thumbnails on its grid'
+      description: 'What an Instagram embed shows: the profile plus the posts that come on the public page itself -- caption, thumbnail, media type (image, video, carousel) and the post URL. NOT an alias of instagram/profile: it returns the list that route returns empty. NOT named posts either, because the */posts family here returns per-post counters and this page has none -- like_count, comment_count and play_count appear ZERO times in the 829 KB page, so metrics is null and never an empty object. published_at is null: the only date in the document is day-precision text inside localized alt text, sitting next to a third party name, and a guessed hour would be worse than nothing. Measured on 2026-10-01 for nasa: the grid carries 12 nodes and 7 belong to nasa -- the other 5 are collaborators (nasajohnson, astro_anil, jeopardy) and are dropped by user.username, the same filter threads/posts uses. has_more comes from the page own has_next_page and is true; there is no cursor to hand out. Costs 1 credit and caches for an hour; the cache is per endpoint and params, so the three Instagram routes on the same handle download the page three times.'
+      x-creditos: 1
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Instagram
+  /api/v1/instagram/location/posts:
+    get:
+      operationId: instagramLocationPosts
+      summary: Recent posts tagged at a public Instagram location, plus the location itself
+      description: 'Recent posts tagged at a public Instagram location, plus the location itself (name, slug, category and how many posts are tagged there). Order is what the platform served, NOT chronological. Views, reposts and quotes do not exist here. Anchored on the location id: a location that does not exist answers 404, never an empty list.'
+      x-creditos: 1
+      parameters:
+      - name: location_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Instagram
+  /api/v1/instagram/highlight/detail:
+    get:
+      operationId: instagramHighlightDetail
+      summary: The stories inside one public Instagram highlight, plus the highlight and its…
+      description: 'The stories inside one public Instagram highlight, oldest first (measured: chronological, unlike the location tab). Returns the highlight itself -- id, title, cover, how many stories -- plus the owner handle and whether that account is verified or private. Story view counts do not exist here: they are owner metrics and need a logged-in session. Anchored on the highlight id echoed back by the page, so a highlight that does not exist answers 404, never an empty list.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Instagram
+  /api/v1/instagram/post:
+    get:
+      operationId: instagramPost
+      summary: A single public Instagram post, by its shortcode
+      description: 'One public Instagram post by SHORTCODE, from instagram.com/p/{code}/ -- the logged-out page, no account of ours and none of a third party. THE PARSER ALREADY EXISTED WITH NO DOOR: normalizarPost has been in lib/normalize/instagram.js with a committed 934 KB fixture, and no route used it; this is the door, same as bluesky/post. Returns id, url, caption text, thumbnail_url, published_at and metrics with likes and comments -- measured on shortcode Db9IVmrDvQ4: 2445668 likes, 4703 comments. THE AUTHOR COMES BACK ALL NULL, and that is us not filling it in, NOT the platform lacking it: the document carries the owner (user appears 30 times), and normalizarPost does not extract it today -- saying the author is unknown would be a plausible value in the wrong place. title is null because an Instagram post has a caption, not a title, and inventing one from the first line of the caption would serve a guess as a field. A shortcode that does not exist is not reliably distinguishable from our own transport failing, which is why no result is never charged here.'
+      x-creditos: 1
+      parameters:
+      - name: code
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Instagram
 components:
   schemas:
-    Author:
-      type: object
-      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Stable identifier on that platform.
-        handle:
-          type:
-          - string
-          - 'null'
-        name:
-          type:
-          - string
-          - 'null'
-        bio:
-          type:
-          - string
-          - 'null'
-        avatar_url:
-          type:
-          - string
-          - 'null'
-        followers:
-          type:
-          - integer
-          - 'null'
-        following:
-          type:
-          - integer
-          - 'null'
-        posts_count:
-          type:
-          - integer
-          - 'null'
-        verified:
-          type:
-          - boolean
-          - 'null'
-        is_private:
-          type:
-          - boolean
-          - 'null'
-        external_url:
-          type:
-          - string
-          - 'null'
-        url:
-          type:
-          - string
-          - 'null'
     ProfileEnvelope:
       type: object
       required:
@@ -226,6 +338,59 @@ components:
           description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
         request_id:
           type: string
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
   securitySchemes:
     bearerAuth:
       type: http

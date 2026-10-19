@@ -79,61 +79,140 @@ paths:
                 $ref: '#/components/schemas/ProfileEnvelope'
       tags:
       - Tiktok
+  /api/v1/tiktok/search/suggestions:
+    get:
+      operationId: tiktokSearchSuggestions
+      summary: Search terms TikTok suggests for a keyword — the autocomplete list, ranked
+      description: 'The search terms TikTok suggests for a keyword: the autocomplete list behind the search box, read logged-out from the site own preview endpoint. Takes keyword, not handle -- this endpoint answers about a TERM, not about a person, and author comes back with every field null on purpose. Each item carries the suggested term in title, a TikTok search URL built from that term, and the id of the term group; position is the rank TikTok gave it, counted from 1. metrics is always null: a suggestion has no counters, and zeros would claim it has counters that read zero. published_at is null for the same reason -- the endpoint sends no date, and stamping the request time would invent freshness. An empty list is an ANSWER: a keyword with no suggestion returns 200 with items: [] and is charged, because the question was answered. A body we could not read, a missing list, or an error status inside the body is a FAILURE and returns 404 without charging. has_more and next_cursor are null: this endpoint does not page, it sends no cursor and no total, and saying false would promise the list ended. Costs 1 credit and caches for 60 seconds only -- measured on 2026-10-01, 6 of 8 suggested terms for the same keyword changed within the hour, so an hour-long cache would serve a list the platform had already replaced.'
+      x-creditos: 1
+      parameters:
+      - name: keyword
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Tiktok
+  /api/v1/tiktok/post:
+    get:
+      operationId: tiktokPost
+      summary: A single TikTok video by its URL, with caption, cover, date and counters
+      description: 'One public TikTok video by its URL, read logged-out from the video page itself. Takes the FULL video address -- https://www.tiktok.com/@handle/video/1234567890123456789 -- and not an id on its own: the document lives under the handle, so an id without it cannot be addressed. items carries exactly one entry: the video id, its page URL, the caption in text, the cover image in thumbnail_url, the publication date parsed from an epoch in seconds, and metrics with likes, comments, shares, views and saves. title is null -- a video has no title, its caption is a body -- and position is null too, because a list of one has no meaningful order. author carries the id, handle, name, bio, avatar and verified flag the video page publishes, and followers, following and posts_count come back null ON PURPOSE: this page gives a follower count with no exact counterpart to check it against, while tiktok/profile reads the exact one; filling both from different sources would make two of our endpoints disagree about the same account. WARNING: THE LARGE COUNTERS ARE ROUNDED BY TIKTOK on this surface -- measured on 2026-10-02 against the committed capture, both of the page stat blocks agree on 2,000,000 likes and 5,500,000 views, so treat them as rounded to three significant figures and not as exact. A video that is restricted by its owner and an id that does not exist both answer 404 and are NOT charged: the page returns the same status code for the two, and only the status message tells them apart. has_more and next_cursor are null: the document is one video, there is no list to page. Costs 1 credit and caches for an hour -- the video itself does not change, and the counters that do are already rounded.'
+      x-creditos: 1
+      parameters:
+      - name: url
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Tiktok
+  /api/v1/tiktok/video/screen-text:
+    get:
+      operationId: tiktokVideoScreenText
+      summary: The on-screen text of one TikTok video, one item per line, in reading order
+      description: 'The on-screen text of one public TikTok video: the words burned on top of the frames, read logged-out from the video page itself. Takes the FULL video address -- https://www.tiktok.com/@handle/video/1234567890123456789 -- and not a bare id, because the page needs the handle in the path. Returns one item per line, in the order the document declares them, which is reading order on screen. This is NOT the caption and NOT the spoken audio: the caption is the text field of tiktok/post, and the spoken audio is a separate WEBVTT asset served by tiktok/post_transcript. Three different texts live in the same document and mixing them up would return plausible wrong data. Measured on 2026-10-01 across 10 reachable videos: 7 carry at least one line of on-screen text and 3 carry none. A video that exists and has no on-screen text answers with items: [] and IS charged -- the question was answered and the page was downloaded. A restricted, missing or unclassifiable video answers 404 and costs nothing. metrics, published_at and thumbnail_url are null on every item: a line of text has no date, no picture and no counter, and returning zeros would claim it has them. Costs 1 credit and caches for an hour. The cache is per endpoint and params, so asking for post and screen-text on the same video downloads the page twice.'
+      x-creditos: 1
+      parameters:
+      - name: url
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Tiktok
+  /api/v1/tiktok/post/transcript:
+    get:
+      operationId: tiktokPostTranscript
+      summary: The spoken transcript of one TikTok video, as one item, without cue timings
+      description: 'The spoken transcript of one public TikTok video, read logged-out. Takes the FULL video address -- https://www.tiktok.com/@handle/video/1234567890123456789 -- and not a bare id, because the page needs the handle in the path. This is the AUDIO, not the caption and not the words burned on the frames: the caption is the text field of tiktok/post and the on-screen words are tiktok/video_screen_text. Three different texts live in the same video and mixing them up would return plausible wrong data. HOW OFTEN IT EXISTS: measured on 2026-10-01 across 10 reachable videos, only 1 carried a subtitle track. A video with no track answers items: [] and IS charged -- the question was answered and the page was downloaded. Expect the empty answer to be the common one. The transcript comes back as ONE item whose text is the whole speech, because the source is a WEBVTT of automatic speech recognition and its cues are arbitrary time slices, not sentences -- one cue in the measured file is "and you need to stop being immature", mid-sentence. The cue TIMINGS are not published: this schema has no offset field, and inventing one per route is how an API starts speaking two languages. title carries the language the source declares (eng-US in the measurement) or null. id, published_at, thumbnail_url and metrics are null: speech has no identifier, no date, no picture and no counter. Reading it costs TWO network calls on our side -- the video page points at a file on another host -- and still 1 credit, because you asked for one thing. Caches for an hour, the same as tiktok/post and tiktok/video_screen_text, so asking for more than one of them on the same video downloads the page once per endpoint.'
+      x-creditos: 1
+      parameters:
+      - name: url
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Tiktok
 components:
   schemas:
-    Author:
-      type: object
-      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Stable identifier on that platform.
-        handle:
-          type:
-          - string
-          - 'null'
-        name:
-          type:
-          - string
-          - 'null'
-        bio:
-          type:
-          - string
-          - 'null'
-        avatar_url:
-          type:
-          - string
-          - 'null'
-        followers:
-          type:
-          - integer
-          - 'null'
-        following:
-          type:
-          - integer
-          - 'null'
-        posts_count:
-          type:
-          - integer
-          - 'null'
-        verified:
-          type:
-          - boolean
-          - 'null'
-        is_private:
-          type:
-          - boolean
-          - 'null'
-        external_url:
-          type:
-          - string
-          - 'null'
-        url:
-          type:
-          - string
-          - 'null'
     ProfileEnvelope:
       type: object
       required:
@@ -226,6 +305,59 @@ components:
           description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
         request_id:
           type: string
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
   securitySchemes:
     bearerAuth:
       type: http

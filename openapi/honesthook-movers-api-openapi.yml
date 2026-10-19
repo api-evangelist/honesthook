@@ -27,7 +27,7 @@ paths:
         RANKED BY POINTS GAINED, NOT BY POSITION. This is the caveat that matters most, so it is stated before the parameters. Measured on 2026-09-06 across 19 pairs of windows: position changed for 19 of 29 items WITHOUT A SINGLE POINT CHANGING. Most items in a snapshot sit within a few points of each other, so ties are the rule, and a tie reshuffle looks exactly like movement if you read `position`. `points_gained` is Hacker News''s own counter, not a number we derive, and it is what this endpoint sorts by.
 
 
-        `interval_min` IS THE REAL ELAPSED TIME between the two captures compared, not the window you asked for. The endpoint picks the archived window whose real capture time is closest to `horas` ago — windows are not equidistant, and observed intervals have ranged from 12 to 321 minutes. Asking `horas=24` against an archive that is 20 hours deep returns `intervalo_min: 1208`, not 1440. Divide by this number, not by the one you sent.
+        `interval_min` IS THE REAL ELAPSED TIME between the two captures compared, not the window you asked for. The endpoint picks the archived window whose real capture time is closest to `hours` ago — windows are not equidistant, and observed intervals have ranged from 12 to 321 minutes. Asking `hours=24` against an archive that is 20 hours deep returns `interval_min: 1208`, not 1440. Divide by this number, not by the one you sent.
 
 
         An unknown niche is NOT a 404 here: it produces the same empty, uncharged 200 as a quiet window. Confirm the niche exists at `/api/v1/nichos` before reading an empty result as ''nothing moved''.'
@@ -56,7 +56,7 @@ paths:
         description: Top N by points gained. Clamped to 100 in the database; a larger value here does not raise it.
       responses:
         '200':
-          description: 'OK — with movement (`cobrado: 10`) or without it (`cobrado: 0`, `itens: []`, and a `note`). Both are successes; branch on `total`, not on the status code.'
+          description: 'OK — with movement (`credits_charged: 10`) or without it (`credits_charged: 0`, `items: []`, and a `note`). Both are successes; branch on `total`, not on the status code.'
           content:
             application/json:
               schema:
@@ -99,7 +99,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/Mover'
         '400':
-          description: '`parametro_invalido` — `horas` outside 1–720 or `limit` outside 1–100, or either one not an integer. Rejected before the call reaches the archive, so nothing is charged.'
+          description: '`parametro_invalido` — `hours` outside 1–720 or `limit` outside 1–100, or either one not an integer. Rejected before the call reaches the archive, so nothing is charged.'
           content:
             application/json:
               schema:

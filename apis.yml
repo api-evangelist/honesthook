@@ -317,6 +317,24 @@ apis:
     url: json-schema/honesthook-mover-schema.json
   - type: JSONSchema
     url: json-schema/honesthook-item-schema.json
+- aid: honesthook:honesthook-hackernews-api
+  name: HonestHook Hackernews API
+  description: The Hackernews API from HonestHook — 4 operation(s) for hackernews.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Hackernews
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-hackernews-api-openapi.yml
+- aid: honesthook:honesthook-youtube-api
+  name: HonestHook YouTube API
+  description: The Youtube API from HonestHook — 13 operation(s) for youtube.
+  humanURL: https://honesthook.com/docs
+  tags:
+  - Youtube
+  properties:
+  - type: OpenAPI
+    url: openapi/honesthook-youtube-api-openapi.yml
 x-enrichment:
   date: '2026-09-25'
   status: enriched

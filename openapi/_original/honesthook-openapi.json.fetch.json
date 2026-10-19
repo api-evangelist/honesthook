@@ -1,0 +1,12 @@
+{
+ "url": "https://honesthook.com/openapi.json",
+ "final": "https://honesthook.com/openapi.json",
+ "status": 200,
+ "content_type": "application/json",
+ "bytes": 107390,
+ "sha256": "cb0637ff2adc069bb97b4ca8d4fac3efe5a1dd1d883c96fa154736c5075a817e",
+ "fetched_at": "2026-10-19",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "re-archived: the provider's current document replaced a stale archive (roadmap#793); the old files are in openapi/_superseded/2026-10-19-stale"
+}

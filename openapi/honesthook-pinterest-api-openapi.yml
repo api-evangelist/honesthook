@@ -79,61 +79,41 @@ paths:
                 $ref: '#/components/schemas/ProfileEnvelope'
       tags:
       - Pinterest
+  /api/v1/pinterest/boards:
+    get:
+      operationId: pinterestBoards
+      summary: Public boards of a Pinterest account — name, description, pin count and…
+      description: 'The public boards of a Pinterest account: id, name, description, board URL, cover image, creation date, pin count and follower count for each one -- read from the SAME logged-out profile page as pinterest/profile. Measured on 2026-10-01 against the committed 1.3 MB page for nasa: 10 distinct boards, every one carrying all of those fields. Returns the SHELF, not the pins: the pins inside a board are not on this page, so listing them would be a different call. metrics carries pins and followers, never likes -- a board has no likes, and reusing the post field names would invite summing things that are not the same. published_at is the board creation date, parsed from an RFC 1123 string, not an epoch. Boards owned by someone else are dropped by owner.username, the same filter threads/posts uses. has_more and next_cursor are null: what the page carried is what exists, and paging would mean another surface. Costs 1 credit and caches for an hour; the cache is per endpoint and params, so asking for profile and boards on the same handle downloads the page twice.'
+      x-creditos: 1
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Pinterest
 components:
   schemas:
-    Author:
-      type: object
-      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Stable identifier on that platform.
-        handle:
-          type:
-          - string
-          - 'null'
-        name:
-          type:
-          - string
-          - 'null'
-        bio:
-          type:
-          - string
-          - 'null'
-        avatar_url:
-          type:
-          - string
-          - 'null'
-        followers:
-          type:
-          - integer
-          - 'null'
-        following:
-          type:
-          - integer
-          - 'null'
-        posts_count:
-          type:
-          - integer
-          - 'null'
-        verified:
-          type:
-          - boolean
-          - 'null'
-        is_private:
-          type:
-          - boolean
-          - 'null'
-        external_url:
-          type:
-          - string
-          - 'null'
-        url:
-          type:
-          - string
-          - 'null'
     ProfileEnvelope:
       type: object
       required:
@@ -226,6 +206,59 @@ components:
           description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
         request_id:
           type: string
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
   securitySchemes:
     bearerAuth:
       type: http

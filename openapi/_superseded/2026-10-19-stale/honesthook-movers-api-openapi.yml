@@ -1,0 +1,198 @@
+openapi: 3.2.0
+info:
+  title: HonestHook Movers API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Movers
+paths:
+  /api/v1/movers/{niche}:
+    get:
+      operationId: nicheMovers
+      summary: What gained traction in a niche — charged only when it finds movement
+      x-credits: 10
+      x-charges-without-result: false
+      description: 'Costs 10 credits, and CHARGES ONLY IF IT FINDS MOVEMENT. An empty result is a 200 with `credits_charged: 0` and a `note` saying so, not an error and not a charge: the risk of an empty window sits with us, so you do not need defensive logic to avoid calling.
+
+
+        RANKED BY POINTS GAINED, NOT BY POSITION. This is the caveat that matters most, so it is stated before the parameters. Measured on 2026-09-06 across 19 pairs of windows: position changed for 19 of 29 items WITHOUT A SINGLE POINT CHANGING. Most items in a snapshot sit within a few points of each other, so ties are the rule, and a tie reshuffle looks exactly like movement if you read `position`. `points_gained` is Hacker News''s own counter, not a number we derive, and it is what this endpoint sorts by.
+
+
+        `interval_min` IS THE REAL ELAPSED TIME between the two captures compared, not the window you asked for. The endpoint picks the archived window whose real capture time is closest to `horas` ago — windows are not equidistant, and observed intervals have ranged from 12 to 321 minutes. Asking `horas=24` against an archive that is 20 hours deep returns `intervalo_min: 1208`, not 1440. Divide by this number, not by the one you sent.
+
+
+        An unknown niche is NOT a 404 here: it produces the same empty, uncharged 200 as a quiet window. Confirm the niche exists at `/api/v1/nichos` before reading an empty result as ''nothing moved''.'
+      parameters:
+      - name: niche
+        in: path
+        required: true
+        schema:
+          type: string
+        example: ai-agents
+      - name: hours
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 720
+          default: 24
+        description: How far back to look for the comparison window. A target, not a guarantee — the archive answers with the closest window it actually has, and reports the real gap in `interval_min`.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: Top N by points gained. Clamped to 100 in the database; a larger value here does not raise it.
+      responses:
+        '200':
+          description: 'OK — with movement (`cobrado: 10`) or without it (`cobrado: 0`, `itens: []`, and a `note`). Both are successes; branch on `total`, not on the status code.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - niche
+                - items
+                - total
+                - credits_charged
+                - credits_balance
+                properties:
+                  niche:
+                    type: string
+                    example: ai-agents
+                  total:
+                    type: integer
+                    description: Number of items in `items`.
+                  interval_min:
+                    type:
+                    - integer
+                    - 'null'
+                    example: 1208
+                    description: Real minutes between the two captures compared. `null` when there was no movement to compare. A delta without an interval is a number without a unit — read this before reading `points_gained`.
+                  credits_charged:
+                    type: integer
+                    enum:
+                    - 0
+                    - 10
+                    description: Credits actually charged for this call. 0 when the result was empty.
+                  credits_balance:
+                    type: integer
+                    description: Credits left on the key after this call.
+                  note:
+                    type: string
+                    description: Present only on an empty, uncharged result.
+                    example: nothing gained traction in this window -- not charged
+                  items:
+                    type: array
+                    description: Sorted by `points_gained`, descending.
+                    items:
+                      $ref: '#/components/schemas/Mover'
+        '400':
+          description: '`parametro_invalido` — `horas` outside 1–720 or `limit` outside 1–100, or either one not an integer. Rejected before the call reaches the archive, so nothing is charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: '`chave_invalida` — missing, unknown or deactivated key. A missing `Authorization` header reports the same code as a wrong key: the database decides, and it cannot tell an absent key from one that does not exist. The response carries `WWW-Authenticate: Bearer`.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '402':
+          description: 'Not enough credits — `sem_creditos` (body carries `credits_balance` and `needed`) or `teto_estourado` (body carries `spent_this_month` and `cap`). 402 and not 429 on purpose: 429 means wait and retry, 402 means waiting will not help. Do not back off — top up or raise the ceiling.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '503':
+          description: '`endpoint_indisponivel` — this endpoint is switched off at the database, not broken. Nothing charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      tags:
+      - Movers
+components:
+  schemas:
+    ApiError:
+      type: object
+      required:
+      - erro
+      properties:
+        error:
+          type: string
+          enum:
+          - chave_ausente
+          - chave_invalida
+          - intervalo_invalido
+          - parametro_invalido
+          - sem_creditos
+          - teto_estourado
+          - endpoint_indisponivel
+          - metodo_invalido
+          - indisponivel
+        message:
+          type: string
+        http:
+          type: integer
+          description: Echoed by errors that originate in the database. The real HTTP status is authoritative — do not branch on this field.
+        limit:
+          type: integer
+        renews_at:
+          type: string
+          format: date
+        credits_balance:
+          type: integer
+          description: '`sem_creditos` only: credits left on the key.'
+        needed:
+          type: integer
+          description: '`sem_creditos` only: credits the call would cost.'
+        spent_this_month:
+          type: integer
+          description: '`teto_estourado` only: credits spent this month.'
+        cap:
+          type: integer
+          description: '`teto_estourado` only: the monthly ceiling.'
+    Mover:
+      type: object
+      description: One item that GAINED points between the two compared windows. Items that lost points, and items present in only one of the two windows, are not in this list — losing is not traction, and an item with nothing to compare against has no delta.
+      properties:
+        external_id:
+          type: string
+          example: '49569136'
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        points:
+          type: integer
+          description: Score in the newest window.
+        points_gained:
+          type: integer
+          minimum: 1
+          description: Newest score minus oldest. Always positive. THIS is the ranking key of the response — see the endpoint description for why it is not position.
+        comments:
+          type:
+          - integer
+          - 'null'
+        position:
+          type: integer
+          description: Position in the newest window, carried for reference only. Do not rank by it and do not diff it across calls.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'

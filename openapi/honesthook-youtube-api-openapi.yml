@@ -1,0 +1,629 @@
+openapi: 3.2.0
+info:
+  title: HonestHook YouTube API
+  version: 1.0.0
+  description: Profiles and posts from the major social networks, through one API. One key, one response shape; rate limits, retries and platform changes are on us. Clean JSON for your app or your AI agent. We read the exact field each platform publishes, and return null when none exists. Plus a historical trend archive that answers what was trending, which cannot be reconstructed after the fact.
+  contact:
+    url: https://honesthook.com
+  license:
+    name: Proprietary
+    url: https://honesthook.com/docs
+servers:
+- url: https://honesthook.com
+security:
+- bearerAuth: []
+tags:
+- name: Youtube
+paths:
+  /api/v1/youtube/channel:
+    get:
+      operationId: youtubeChannel
+      summary: Public channel on YouTube, with the exact subscriber count
+      x-credits: 1
+      x-charges-without-result: false
+      description: 'One public profile, normalised into the same envelope as every other platform. Source: googleapis.com Data API v3 (official, authenticated). Costs 1 credit; the answer is cached for an hour and a cache hit costs nothing (`cached: true`, `credits_used: 0`).
+
+
+        YouTube handle without the `@`: letters, digits, dot, hyphen and underscore, 3 to 30 characters. Legacy usernames and `UC...` channel ids are not accepted here.'
+      parameters:
+      - name: handle
+        in: query
+        required: true
+        description: 'YouTube handle without the `@`: letters, digits, dot, hyphen and underscore, 3 to 30 characters. Legacy usernames and `UC...` channel ids are not accepted here.'
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9._-]{3,30}$
+          example: mkbhd
+      responses:
+        '200':
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '400':
+          description: '`parametro_invalido` — the handle is missing or does not match this platform''s format. Nothing is charged.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '401':
+          description: '`chave_invalida` — key missing, unknown or inactive.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '402':
+          description: 'Out of credits. Two different types, and they mean different things: `sem_creditos` (both wallets are empty) and `teto_estourado` (the key has a monthly ceiling and hit it). Waiting does not help either one before the 1st — this is not a rate limit.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '404':
+          description: '`nao_encontrado` — no such profile on that platform.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '451':
+          description: '`bloqueado` — the platform refused us. The resource exists and YOUR key is fine; 403 would wrongly blame the caller.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+        '503':
+          description: '`indisponivel` — this endpoint is switched off in the catalogue, or a dependency of ours is down. Your key is fine.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelope'
+      tags:
+      - Youtube
+  /api/v1/youtube/video:
+    get:
+      operationId: youtubeVideo
+      summary: One public YouTube video by id, with the exact view and like counts in…
+      description: 'One public YouTube video by id, read from the logged-out watch page. Returns the EXACT like count -- not the abbreviated one the interface shows next to it. The exact view count is read and NOT returned: the published metrics contract has four keys (likes, replies, reposts, quotes) and no views. replies is null because the page carries no comment count. The 20 recommended videos the page cites are discarded.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/channel/videos:
+    get:
+      operationId: youtubeChannelVideos
+      summary: The 50 most recent videos of a YouTube channel, with exact view, like and…
+      description: 'The 50 most recent videos of a YouTube channel, from the official Data API v3 (channels.list + playlistItems.list + videos.list, 3 quota units). EXACT viewCount, likeCount and commentCount per video, plus duration and whether it is a live broadcast. The view count is read and NOT returned: the published metrics contract has four keys and views is not one of them. has_more is null, never false.'
+      x-creditos: 1
+      parameters:
+      - name: channel_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/playlist:
+    get:
+      operationId: youtubePlaylist
+      summary: The videos a public YouTube playlist feed carries, with exact views and likes…
+      description: 'The videos a public YouTube playlist feed carries, with the exact like count per video. CEILING OF 15, and it is the feed''s ceiling, not the playlist''s size -- has_more is null because the feed does not say how long the playlist is. The playlist TITLE is not returned: the envelope has no field for a collection name, and author is the owning channel.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/channel/shorts:
+    get:
+      operationId: youtubeChannelShorts
+      summary: The Shorts on a YouTube channel's Shorts tab, with titles and thumbnails
+      description: 'The Shorts on a YouTube channel''s Shorts tab, read from the logged-out page. Title, id and thumbnail per Short. The view count is NOT returned: the tab publishes it abbreviated and localised ("256K views"), and an abbreviated value becomes null here, never a reconstructed number -- call youtube/video by the id for the exact count. published_at is null too: the tab shows a relative date ("3 days ago").'
+      x-creditos: 1
+      parameters:
+      - name: channel_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/channel/lives:
+    get:
+      operationId: youtubeChannelLives
+      summary: The streams on a YouTube channel's Live tab — past, in progress and scheduled…
+      description: 'The streams on a YouTube channel''s Live tab (served by YouTube at /streams). WARNING: past, in-progress and SCHEDULED streams come in one list and the state of each is NOT returned -- measured badges include LIVE and Upcoming. Call youtube/video by the id and read isLiveContent. No metric is returned: a scheduled stream has no views, and the tab metadata reads "N waiting" or "N watching" -- the second is an exact count of people watching right now, and it still does not fit: metrics has four keys and a concurrent viewer is none of them.'
+      x-creditos: 1
+      parameters:
+      - name: channel_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/channel/playlists:
+    get:
+      operationId: youtubeChannelPlaylists
+      summary: The public playlists of a YouTube channel, with the exact video count of each…
+      description: 'The public playlists of a YouTube channel, from the official Data API v3 (channels.list + playlists.list, 2 quota units). metrics.videos is contentDetails.itemCount, an exact integer. WARNING: a podcast may come through as a playlist -- the resource has status.podcastStatus but its values were not read against a real response, and guessing the value of a field to decide what the client receives is not something we do.'
+      x-creditos: 1
+      parameters:
+      - name: channel_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/video/comments:
+    get:
+      operationId: youtubeVideoComments
+      summary: Top-level comments on a public YouTube video — text, date and like count.
+      description: 'Top-level comments on a public YouTube video, from the official Data API v3 (videos.list + commentThreads.list, 2 quota units). Returns the comment TEXT (textOriginal, not the HTML of textDisplay), the date and the like count -- and metrics.replies is totalReplyCount, which measures without identifying. WHO WROTE EACH COMMENT IS NOT RETURNED: the four author fields the API sends are read and discarded, because an item has no author field in this contract. The embedded replies.comments are not flattened into the list; call youtube/video/comment/replies with the comment id.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/video/comment/replies:
+    get:
+      operationId: youtubeVideoCommentReplies
+      summary: Replies to one YouTube comment — text, date and like count.
+      description: 'Replies to one YouTube comment, from the official Data API v3 (comments.list?id= as the anchor + comments.list?parentId=, 2 quota units). Same contract as youtube/video/comments: text, date and like count, and who wrote each reply is not returned. The anchor is not optional -- parentId returns an empty list both for a parent with no replies and for an id that does not exist. The author of the envelope carries only the channel id: the comment resource has no channelTitle, and a name nobody asked for is not worth another quota unit.'
+      x-creditos: 1
+      parameters:
+      - name: parent_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/playlist/items:
+    get:
+      operationId: youtubePlaylistItems
+      summary: The videos in a YouTube playlist, from the official Data API v3 (playlists.list…
+      description: 'The videos in a YouTube playlist, from the official Data API v3 (playlists.list + playlistItems.list + videos.list, 3 quota units). EXACT viewCount, likeCount and commentCount per video, in the order the playlist declares. The first call is the ANCHOR and it is not ceremony: the API answers 200 with items: [] for a playlist that does not exist, and playlistItems.list on a missing playlist returns the same empty list an empty playlist returns -- without it, 404 and "empty playlist" would be the same answer. One page of up to 50: the playlist size and contentDetails.itemCount are NOT returned, and has_more is null, never false. The playlist title is not returned either -- the envelope has no field for a collection name, so author is the owning channel.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/video/thumbnails:
+    get:
+      operationId: youtubeVideoThumbnails
+      summary: Every thumbnail the official Data API v3 declares for one YouTube video…
+      description: 'Every thumbnail the official Data API v3 declares for one YouTube video (videos.list, 1 quota unit), one item per size: id is the size name (default, medium, high, standard, maxres) and metrics carries width and height. Only the sizes that video actually has come back -- NO url is ever built from a filename convention, so a size the response did not declare is absent rather than a guessed link that may 404. Nothing else about the video is returned: title, duration, views and likes are youtube/video.'
+      x-creditos: 1
+      parameters:
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/videos/trending:
+    get:
+      operationId: youtubeVideosTrending
+      summary: The videos trending in one region, from the official Data API v3 (videos.list…
+      description: 'The videos trending in one region, from the official Data API v3 (videos.list with chart=mostPopular, 1 quota unit) -- up to 50, in chart order, with exact view, like and comment counts. The region parameter is REQUIRED on purpose: trending does not exist without a region, and a silent default would publish one country''s chart as if it were the world''s. There is no author -- the list belongs to a region, not to an account, so the twelve author fields are null by decision. has_more is null, never false. The category is not returned: snippet carries a numeric categoryId whose meaning needs another call we do not make, and serving the raw number would serve a code the client cannot resolve.'
+      x-creditos: 1
+      parameters:
+      - name: region
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+  /api/v1/youtube/profile/full:
+    get:
+      operationId: youtubeProfileFull
+      summary: One YouTube channel plus its recent videos in a single answer, from the…
+      description: 'One YouTube channel plus its recent videos in a single answer, from the official Data API v3 (channels.list + playlistItems.list + videos.list, 3 quota units) -- the channel in author with exact subscriber, video and view counts, and the recent uploads as items with exact view, like and comment counts. NO COMPUTED ANALYTICS ARE RETURNED: no average views per video, no engagement rate, no upload cadence, no growth. It is a COMPOSITION of calls the client could make separately, saved as one request; every number in it is a number the source states. It does NOT use search.list. One page of recent uploads -- limit is NOT accepted and has_more is null, never false.'
+      x-creditos: 1
+      parameters:
+      - name: channel_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Data found.
+        '400':
+          description: See the shared error shape.
+        '401':
+          description: See the shared error shape.
+        '402':
+          description: See the shared error shape.
+        '404':
+          description: See the shared error shape.
+        '405':
+          description: See the shared error shape.
+        '451':
+          description: See the shared error shape.
+        '502':
+          description: See the shared error shape.
+        '503':
+          description: See the shared error shape.
+      tags:
+      - Youtube
+components:
+  schemas:
+    ProfileEnvelope:
+      type: object
+      required:
+      - success
+      - platform
+      - endpoint
+      - data
+      - error
+      - credits_used
+      - credits_remaining
+      - cached
+      - request_id
+      description: Identical shape on success and on error, so a client writes one parser. `success` is the only field that decides; `data` and `error` are mutually exclusive and the other is null, never absent.
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        endpoint:
+          type: string
+        data:
+          type:
+          - object
+          - 'null'
+          properties:
+            author:
+              $ref: '#/components/schemas/Author'
+            items:
+              type: array
+              items:
+                type: object
+            has_more:
+              type:
+              - boolean
+              - 'null'
+            next_cursor:
+              type:
+              - string
+              - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+          properties:
+            type:
+              type: string
+              enum:
+              - parametro_invalido
+              - chave_invalida
+              - sem_creditos
+              - teto_estourado
+              - nao_encontrado
+              - bloqueado
+              - indisponivel
+              description: Branch on this, never on the message text.
+            message:
+              type: string
+            details:
+              type:
+              - object
+              - 'null'
+        credits_used:
+          type: integer
+        credits_remaining:
+          type:
+          - integer
+          - 'null'
+          description: 'THE SUM: purchased balance plus what is left of this month''s free allowance. This is the only number that answers "can I call again" — it is not 0 while you can still call. null means we could not read it, which is not the same as zero.'
+        credits_purchased_remaining:
+          type:
+          - integer
+          - 'null'
+          description: Bought credits. These never expire.
+        free_credits_remaining:
+          type:
+          - integer
+          - 'null'
+          description: What is left of this month's free allowance.
+        free_credits_total:
+          type:
+          - integer
+          - 'null'
+          description: The monthly free allowance for this key.
+        free_credits_reset_at:
+          type: string
+          format: date-time
+          description: 'When the free allowance resets: 00:00 UTC on the 1st. It is here so the sum dropping at the turn of the month is expected rather than a surprise.'
+        cached:
+          type: boolean
+          description: '`true` is a promise that we did NOT charge: it always comes with `credits_used: 0`.'
+        request_id:
+          type: string
+    Author:
+      type: object
+      description: 'The same twelve names on every platform. A field that does not exist there is null, never absent and never zero: zero is a fact about the account, null is a fact about our reading.'
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Stable identifier on that platform.
+        handle:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        bio:
+          type:
+          - string
+          - 'null'
+        avatar_url:
+          type:
+          - string
+          - 'null'
+        followers:
+          type:
+          - integer
+          - 'null'
+        following:
+          type:
+          - integer
+          - 'null'
+        posts_count:
+          type:
+          - integer
+          - 'null'
+        verified:
+          type:
+          - boolean
+          - 'null'
+        is_private:
+          type:
+          - boolean
+          - 'null'
+        external_url:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'
