@@ -456,3 +456,9 @@ components:
       type: http
       scheme: bearer
       description: 'API key, sent as `Authorization: Bearer hk_live_...`. Quota is monthly and renews on the 1st. Unused quota does not roll over and does not expire mid-cycle — you get the whole month.'
+x-provenance:
+  method: harvested
+  publisher: HonestHook
+  source: https://honesthook.com/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
