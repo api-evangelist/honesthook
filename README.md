@@ -64,5 +64,133 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-HonestHook is a company surfaced via the API Evangelist harvest backlog (source: new-submission) and added to the network as a stub for full-pipeline profiling.
-- https://honesthook.com/
+HonestHook provides a unified API to access public social media data from major platforms. It offers profiles and posts through a single key and response format, handling rate limits, retries, and platform changes. Users get 1,000 free credits per month without a credit card, with paid tiers for higher usage.
+
+**Areas:** Company · Social Media · Data Aggregation · Software-as-a-Service
+
+## HonestHook on APIs.io
+
+Everything profiled for HonestHook is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/honesthook/](https://apis.io/providers/honesthook/)** — or go straight to one of the APIs or properties below.
+
+### APIs (14)
+
+- [HonestHook Bluesky API](https://apis.io/apis/honesthook/honesthook-bluesky-api/) — The Bluesky API from HonestHook — 2 operation(s) for bluesky.
+- [HonestHook GitHub API](https://apis.io/apis/honesthook/honesthook-github-api/) — The Github API from HonestHook — 2 operation(s) for github.
+- [HonestHook History API](https://apis.io/apis/honesthook/honesthook-history-api/) — The History API from HonestHook — 1 operation(s) for history.
+- [HonestHook Instagram API](https://apis.io/apis/honesthook/honesthook-instagram-api/) — The Instagram API from HonestHook — 1 operation(s) for instagram.
+- [HonestHook Linktree API](https://apis.io/apis/honesthook/honesthook-linktree-api/) — The Linktree API from HonestHook — 1 operation(s) for linktree.
+- [HonestHook Mastodon API](https://apis.io/apis/honesthook/honesthook-mastodon-api/) — The Mastodon API from HonestHook — 2 operation(s) for mastodon.
+- [HonestHook Medium API](https://apis.io/apis/honesthook/honesthook-medium-api/) — The Medium API from HonestHook — 1 operation(s) for medium.
+- [HonestHook Movers API](https://apis.io/apis/honesthook/honesthook-movers-api/) — The Movers API from HonestHook — 1 operation(s) for movers.
+- [HonestHook Nichos API](https://apis.io/apis/honesthook/honesthook-nichos-api/) — The Nichos API from HonestHook — 1 operation(s) for nichos.
+- [HonestHook Pinterest API](https://apis.io/apis/honesthook/honesthook-pinterest-api/) — The Pinterest API from HonestHook — 1 operation(s) for pinterest.
+- [HonestHook Soundcloud API](https://apis.io/apis/honesthook/honesthook-soundcloud-api/) — The Soundcloud API from HonestHook — 1 operation(s) for soundcloud.
+- [HonestHook Threads API](https://apis.io/apis/honesthook/honesthook-threads-api/) — The Threads API from HonestHook — 2 operation(s) for threads.
+- [HonestHook Tiktok API](https://apis.io/apis/honesthook/honesthook-tiktok-api/) — The Tiktok API from HonestHook — 1 operation(s) for tiktok.
+- [HonestHook Trends API](https://apis.io/apis/honesthook/honesthook-trends-api/) — The Trends API from HonestHook — 1 operation(s) for trends.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### JSON Schema (4)
+
+The data models the API reads and writes.
+
+- [Item](https://apis.io/schemas/honesthook/honesthook-item/)
+- [Mover](https://apis.io/schemas/honesthook/honesthook-mover/)
+- [PostsEnvelope](https://apis.io/schemas/honesthook/honesthook-posts-envelope/)
+- [ProfileEnvelope](https://apis.io/schemas/honesthook/honesthook-profile-envelope/)
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Honesthook Context](https://apis.io/jsonld/honesthook/honesthook-context/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [HonestHook API Rules](https://apis.io/rules/honesthook/honesthook-rules/)
+
+#### Security (1)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Honesthook Domain Security](https://apis.io/security/honesthook/honesthook-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Honesthook Plans Pricing](https://apis.io/plans/honesthook/honesthook-plans-pricing/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://honesthook.com/)
+- [Documentation](https://honesthook.com/docs)
+- [Getting started](https://honesthook.com/quickstart)
+- [Pricing](https://honesthook.com/pricing)
+- [Sign up](https://honesthook.com/login)
+- [Blog](https://honesthook.com/blog)
+- [Terms of service](https://honesthook.com/terms)
+- [Privacy policy](https://honesthook.com/privacy)
+- [Status](https://honesthook.com/status)
+
+## API Evangelist rating
+
+**Kin Score 45.0** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 55.4 |
+| Contract quality | 65.3 |
+| Contract governance | 22.0 |
+| Operational transparency | 15.8 |
+| Developer ergonomics | 23.8 |
+| Access clarity | 65.8 |
+
+**Agent readiness 37.5** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | na |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | na |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | verified |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | na |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 18.6** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/honesthook/](https://apis.io/providers/honesthook/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for HonestHook: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/honesthook/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
